@@ -9,6 +9,15 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+/[Aa]ssets/TutorialInfo/
+
+# Looking Glass Unity Plugin
+/[Aa]ssets/LookingGlass/
+/[Aa]ssets/LookingGlass Post-Processing 3.2.2/
+/[Aa]ssets/StreamingAssets/
+
+# UnityStandaloneFileBrowser
+/[Aa]ssets/StandaloneFileBrowser/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -46,6 +55,7 @@ ExportedObj/
 *.mdb
 *.opendb
 *.VC.db
+.vsconfig
 
 # Unity3D generated meta files
 *.pidb.meta
