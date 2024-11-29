@@ -46,7 +46,7 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 ### Q&A
 **Q: 通常の RGBD 画像との違いは何ですか。**
 
-**A:** 通常、RGBD 画像は、元画像の右側に255階調のデプス情報を保持します。Depth Pro 付属の `run.py` では、0.1m から 250m までのデプス情報の逆数で各ピクセルのデプスを標準化し、0 から 255 までのデプスを割り当てています。この方法では、近くにある被写体の震度情報の解像度は高いですが、例えば地面、壁、草、偶然映り込んだ小さな物体などが手前にあり、奥にメインの被写体があるような画像の場合、メインの被写体のデプス情報の階調が低くなり、凹凸の少ない出力となってしまいます（下の図を参照）。一方、このツールのスクリプトでは、元の float のデプス情報を１万倍して uint32 で保持していますので、メインの被写体にズームしてもデプスの情報が元の推定どおり維持されますので立体感が損なわれません。
+**A:** 通常、RGBD 画像は、元画像の右側に255階調のデプス情報を保持します。Depth Pro 付属の `run.py` では、0.1m から 250m までのデプス情報の逆数で各ピクセルのデプスを正規化し、0 から 255 までのデプスを割り当てています。この方法では、近くにある被写体の震度情報の解像度は高いですが、例えば地面、壁、草、偶然映り込んだ小さな物体などが手前にあり、奥にメインの被写体があるような画像の場合、メインの被写体のデプス情報の階調が低くなり、凹凸の少ない出力となってしまいます（下の図を参照）。一方、このツールのスクリプトでは、元の float のデプス情報を１万倍して uint32 で保持していますので、メインの被写体にズームしてもデプスの情報が元の推定どおり維持されますので立体感が損なわれません。
 
 ![fig2](https://github.com/user-attachments/assets/15175e2d-41d7-4a30-a5a5-6748065f1ff2)
 
@@ -103,7 +103,7 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 ### Q&A
 **Q: What is the difference from a normal RGBD image?**
 
-**A:** Normally, an RGBD image retains 255-level depth information on the right side of the original image. In `run.py` included with Depth Pro, the inverse of depth information from 0.1m to 250m is standardized for each pixel, and depths from 0 to 255 are assigned. In this method, the depth resolution of close objects is high, but in images where, for example, the ground, walls, grass, or small objects accidentally captured are in the foreground and the main subject is in the background, the depth gradation of the main subject becomes low. This results in an output with less depth detail (see the figure below). On the other hand, in the script of this tool, the original float depth information is multiplied by 10,000 and stored as `uint32`. Therefore, even if you zoom in on the main subject, the depth information is maintained as originally estimated, preserving the stereoscopic effect.
+**A:** Normally, an RGBD image retains 255-level depth information on the right side of the original image. In `run.py` included with Depth Pro, the inverse of depth information from 0.1m to 250m is normalized for each pixel, and depths from 0 to 255 are assigned. In this method, the depth resolution of close objects is high, but in images where, for example, the ground, walls, grass, or small objects accidentally captured are in the foreground and the main subject is in the background, the depth gradation of the main subject becomes low. This results in an output with less depth detail (see the figure below). On the other hand, in the script of this tool, the original float depth information is multiplied by 10,000 and stored as `uint32`. Therefore, even if you zoom in on the main subject, the depth information is maintained as originally estimated, preserving the stereoscopic effect.
 
 ![fig2](https://github.com/user-attachments/assets/15175e2d-41d7-4a30-a5a5-6748065f1ff2)
 
