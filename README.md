@@ -39,7 +39,7 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 - 外部パッケージが含まれていないので途中でコンパイルエラーが出ますが、`Ignore` を選択します。
 - Unity Editor が自動的に追加したカメラとライトを削除します。
 - Looking Glass Unity Plugin パッケージ [[URL](https://lookingglassfactory.com/software/looking-glass-unity-plugin)] と UnityStandaloneFileBrowser の Unity パッケージ [[URL](https://github.com/gkngkc/UnityStandaloneFileBrowser)] をダウンロードし、プロジェクトに追加（`import package -> custom package`）します。これでエラーは解消されます。
-- `Assets > `Scenes` にある `SampleScene` を Hierarchy にドロップします。
+- `Assets > Scenes` にある `SampleScene` を Hierarchy にドロップします。
 - 追加した "Sample Scene" 以外のシーンが Hierarchy にある場合は、Unity Editor が自動で追加したものなので削除してください。 
 - Unity Editor 内で実行した場合、F1 キーを押すとエラーで中断しますが、Quilt 画像は正しく生成されます。アプリの実行を再開して引き続き使用することもできます。なお、Quilt 画像は Hologram Camera 内の `QuiltCapture.cs` のインスペクタから生成することもできます（むしろこれが正しい Quilt 画像作成方法です）。
 
