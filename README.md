@@ -16,8 +16,9 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 2. 1.で Depth Pro をインストールしたフォルダ内に、ビルドして作られたすべてのファイルやフォルダをすべてコピー。[^1]
 3. Looking Glass Go で裸眼立体視したい画像をinputフォルダに入れる。
 4. ターミナル上で `python depth-pro_rgbde.py` と入力してスクリプトを実行。`output` フォルダに左半分が元画像で右半分がほぼ透明[^2] の PNG ファイルが生成されます。
-5. スクリプトで出力した画像をアプリで読み込むと Looking Glass Go に立体画像が表示されます。
-6. アプリでズームや奥行きを調整し、F1 キーを押し、Quilt 画像を保存。
+5. Looking Glass Bridge [[URL(https://lookingglassfactory.com/software/looking-glass-bridge)]] を実行し常駐させます。
+6. スクリプトで出力した画像をアプリで読み込むと Looking Glass Go に立体画像が表示されます。
+7. アプリでズームや奥行きを調整し、F1 キーを押し、Quilt 画像を保存。
 
 [^1]: アプリは任意の場所に置いて実行することができますが、その場合は `depth-pro_rgbde.py` は Depth Pro のフォルダに入れてスクリプトを実行します。また `input`、`output` フォルダも作成してください。
 
@@ -40,7 +41,9 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 - Unity Editor が自動的に追加したカメラとライトを削除します。
 - Looking Glass Unity Plugin パッケージ [[URL](https://lookingglassfactory.com/software/looking-glass-unity-plugin)] と UnityStandaloneFileBrowser の Unity パッケージ [[URL](https://github.com/gkngkc/UnityStandaloneFileBrowser)] をダウンロードし、プロジェクトに追加（`import package -> custom package`）します。これでエラーは解消されます。
 - `Assets > Scenes` にある `SampleScene` を Hierarchy にドロップします。
-- 追加した "Sample Scene" 以外のシーンが Hierarchy にある場合は、Unity Editor が自動で追加したものなので削除してください。 
+- 追加した "Sample Scene" 以外のシーンが Hierarchy にある場合は、Unity Editor が自動で追加したものなので削除してください。
+- このアプリを実行する前に Looking Glass Bridge [[URL(https://lookingglassfactory.com/software/looking-glass-bridge)]] を実行して常駐させてください。
+- **CTRL + E** で Looking Glass Go の画面出力がアクティベートされます。
 - Unity Editor 内で実行した場合、F1 キーを押すとエラーで中断しますが、Quilt 画像は正しく生成されます。アプリの実行を再開して引き続き使用することもできます。なお、Quilt 画像は Hologram Camera 内の `QuiltCapture.cs` のインスペクタから生成することもできます（むしろこれが正しい Quilt 画像作成方法です）。
 
 ### Q&A
@@ -73,8 +76,9 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 2. Copy all the built files and folders created into the folder where you installed Depth Pro in step 1.[^3]
 3. Place the image you want to view in naked-eye stereoscopic mode on Looking Glass Go into the `input` folder.
 4. Run the script by typing `python depth-pro_rgbde.py` in the terminal. A PNG file will be generated in the `output` folder, where the left half is the original image and the right half is almost transparent.[^4]
-5. When you load the image output by the script into the app, a stereoscopic image will be displayed on Looking Glass Go.
-6. Adjust zoom and depth in the app, press the **F1 key**, and save the Quilt image.
+5.Run Looking Glass Bridge [URL].
+6. When you load the image output by the script into the app, a stereoscopic image will be displayed on Looking Glass Go.
+7. Adjust zoom and depth in the app, press the **F1 key**, and save the Quilt image.
 
 [^3]: The app can be placed and run from any location, but in that case, place `depth-pro_rgbde.py` in the Depth Pro folder and run the script. Also, please create `input` and `output` folders.
 
@@ -98,6 +102,8 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 - Download and add (via **Import Package -> Custom Package**) the Looking Glass Unity Plugin package [[URL](https://lookingglassfactory.com/software/looking-glass-unity-plugin)] and the UnityStandaloneFileBrowser Unity package [[URL](https://github.com/gkngkc/UnityStandaloneFileBrowser)] to the project. This will resolve the errors.
 - Drag `SampleScene` located in `Assets > Scenes` into the Hierarchy panel.
 - If there are scenes other than the added "SampleScene" in the Hierarchy, delete them as they were automatically added by Unity Editor.
+- Before running this app, run Looking Glass Bridge [[URL(https://lookingglassfactory.com/software/looking-glass-bridge)]].
+- Press **CTRL + E** to activate the screen output of Looking Glass Go.
 - When running within Unity Editor, pressing the **F1 key** will cause an error and interrupt execution, but the Quilt image will be correctly generated. You can resume app execution and continue using it. Note that you can also generate Quilt images from the inspector of `QuiltCapture.cs` inside the Hologram Camera (this is actually the correct way to create Quilt images).
 
 ### Q&A
