@@ -76,7 +76,7 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 2. Copy all the built files and folders created into the folder where you installed Depth Pro in step 1.[^3]
 3. Place the image you want to view in naked-eye stereoscopic mode on Looking Glass Go into the `input` folder.
 4. Run the script by typing `python depth-pro_rgbde.py` in the terminal. A PNG file will be generated in the `output` folder, where the left half is the original image and the right half is almost transparent.[^4]
-5.Run Looking Glass Bridge [[URL](https://lookingglassfactory.com/software/looking-glass-bridge)].
+5. Run Looking Glass Bridge [[URL](https://lookingglassfactory.com/software/looking-glass-bridge)]. 
 6. When you load the image output by the script into the app, a stereoscopic image will be displayed on Looking Glass Go.
 7. Adjust zoom and depth in the app, press the **F1 key**, and save the Quilt image.
 
