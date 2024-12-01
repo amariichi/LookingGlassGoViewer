@@ -49,13 +49,13 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 ### Q&A
 **Q: 通常の RGBD 画像との違いは何ですか。**
 
-**A:** 通常、RGBD 画像は、元画像の右側に255階調のデプス情報を保持します。Depth Pro 付属の `run.py` では、0.1m から 250m までのデプス情報の逆数で各ピクセルのデプスを正規化し、0 から 255 までのデプスを割り当てています。この方法では、近くにある被写体の震度情報の解像度は高いですが、例えば地面、壁、草、偶然映り込んだ小さな物体などが手前にあり、奥にメインの被写体があるような画像の場合、メインの被写体のデプス情報の階調が低くなり、凹凸の少ない出力となってしまいます（下の図を参照）。一方、このツールのスクリプトでは、元の float のデプス情報を１万倍して uint32 で保持していますので、メインの被写体にズームしてもデプスの情報が元の推定どおり維持されますので立体感が損なわれません。
+**A:** 通常、RGBD 画像は、元画像の右側に255階調のデプス情報を保持します。Depth Pro 付属の `run.py` では、0.1m から 250m までのデプス情報の逆数で各ピクセルのデプスを正規化し、0 から 255 までのデプスを割り当てています。この方法では、近くにある被写体の震度情報の解像度は高いですが、例えば地面、壁、草、偶然映り込んだ小さな物体などが手前にあり、奥にメインの被写体があるような画像の場合、メインの被写体のデプス情報の階調が低くなり、凹凸の少ない出力となってしまいます（下の図を参照）。一方、このツールのスクリプトでは、元の float のデプス情報を１万倍して uint32 で保持しており、メインの被写体にズームしてもデプスの情報が元の推定どおり維持されることから立体感が損なわれません。
 
 ![fig2](https://github.com/user-attachments/assets/15175e2d-41d7-4a30-a5a5-6748065f1ff2)
 
 **Q: 出力画像のサイズが大きいです。圧縮してもデプス情報は維持されますか。**
 
-**A:** 非圧縮で出力しているため、サイズが大きいです。試しに Gimp で "Save color values from transparent pixels" にチェックを入れ、圧縮レベルを 9 にして PNG 形式で保存した画像をこのアプリで読み込んでみました。どのようなデプス情報が保持されているかは未確認ですが、デプスの相互関係が大きく破綻する様子は観られませんでした。圧縮した画像を使用するとアプリの動作が軽くなりますが、画質は低下します。
+**A:** 非圧縮で出力しているため、サイズが大きいです。試しに Gimp で "Save color values from transparent pixels" にチェックを入れ、圧縮レベルを 9 にして PNG 形式で右半分にデプス推定結果が付いた画像を圧縮して保存し、このアプリで読み込んでみました。どのようなデプス情報が保持されているかは未確認ですが、デプスの相互関係が大きく破綻する様子は観られませんでした。圧縮した画像を使用するとアプリの動作が軽くなりますが、画質は低下します。
 
 ---
 The following is an automatic translation by ChatGPT and is a provisional translation.
@@ -115,4 +115,4 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 
 **Q: The size of the output image is large. Will the depth information be preserved if compressed?**
 
-**A:** Since the output is uncompressed, the file size is large. I tried loading an image saved in PNG format using GIMP with "Save color values from transparent pixels" checked and compression level set to 9 into this app. While I haven't confirmed the exact depth information retained, there seemed to be no significant distortion in the relative depth relationships. Using compressed images makes the app run smoother, but the image quality may deteriorate.
+**A:** Since the output is uncompressed, the file size is large. I tried loading an compressed image, which is accompanied with compressed depth information in its right half, saved in PNG format using GIMP with "Save color values from transparent pixels" checked and compression level set to 9 into this app. While I haven't confirmed the exact depth information retained, there seemed to be no significant distortion in the relative depth relationships. Using compressed images makes the app run smoother, but the image quality may deteriorate.
