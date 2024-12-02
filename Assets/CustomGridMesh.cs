@@ -140,37 +140,37 @@ public class MeshGenerator : MonoBehaviour
     }
     private void Update()
     {
-        if (isMeshCreated)
+        if (!isMeshCreated)
+            return;
+        
+        // Update z coordinates, Z座標を更新
+        UpdateVertexZPositions(i =>
         {
-            // Update z coordinates, Z座標を更新
-            UpdateVertexZPositions(i =>
+            float zValue;
+            magnificationRatio = sliderMagnificationRatio.value;
+            cropDistance = sliderCropDistance.value;
+            compressNearest = sliderCompressNearest.value;
+            compressFarthest = sliderCompressFarthest.value;
+            compressDistance = sliderCompressDistance.value;
+
+            zValue = Mathf.Min((zValues[i] - zValueMin) * Mathf.Sqrt(magnificationRatio), cropDistance);
+
+            // Adjustment of image depth, 画像の距離感の調整用
+            if(compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
+            if(compressDistance >(compressFarthest - compressNearest)) { compressDistance = compressFarthest - compressNearest - 0.1f; }
+            if(zValue > compressNearest && zValue < compressFarthest)
             {
-                float zValue;
-                magnificationRatio = sliderMagnificationRatio.value;
-                cropDistance = sliderCropDistance.value;
-                compressNearest = sliderCompressNearest.value;
-                compressFarthest = sliderCompressFarthest.value;
-                compressDistance = sliderCompressDistance.value;
-
-                zValue = Mathf.Min((zValues[i] - zValueMin) * Mathf.Sqrt(magnificationRatio), cropDistance);
-
-                // Adjustment of image depth, 画像の距離感の調整用
-                if(compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
-                if(compressDistance >(compressFarthest - compressNearest)) { compressDistance = compressFarthest - compressNearest - 0.1f; }
-                if(zValue > compressNearest && zValue < compressFarthest)
-                {
-                    zValue = (compressNearest + (zValue - compressNearest) / (compressFarthest - compressNearest) * compressDistance);
-                }
-                else if(zValue >= compressFarthest)
-                {
-                    zValue = Mathf.Max(compressNearest, (zValue - compressFarthest) + compressDistance + compressNearest);
-                }
-                return zValue;
+                zValue = (compressNearest + (zValue - compressNearest) / (compressFarthest - compressNearest) * compressDistance);
+            }
+            else if(zValue >= compressFarthest)
+            {
+                zValue = Mathf.Max(compressNearest, (zValue - compressFarthest) + compressDistance + compressNearest);
+            }
+            return zValue;
         //      float x = vertices[i].x;
         //      float y = vertices[i].y;
         //      return Mathf.Sin(Time.time + x + y) * 0.5f; // Sine wave, 振幅0.5のサイン波
-            });
-        }
+        });
     }
 
     // Update Vertex Z Position, 頂点のZ座標を変更するメソッド
