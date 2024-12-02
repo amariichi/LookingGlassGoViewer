@@ -53,7 +53,7 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 
 ![fig2](https://github.com/user-attachments/assets/15175e2d-41d7-4a30-a5a5-6748065f1ff2)
 
-**Q: 出力画像のサイズが大きいです。圧縮してもデプス情報は維持されますか。**
+**Q: Python スクリプトの出力画像のサイズが大きいです。圧縮してもデプス情報は維持されますか。**
 
 **A:** 非圧縮で出力しているため、サイズが大きいです。試しに GIMP で "Save color values from transparent pixels" にチェックを入れ、右半分にデプス推定結果が付いた出力画像を圧縮レベル 9 でPNG形式で保存し、このアプリで読み込んでみました。どのようなデプス情報が保持されているかは未確認ですが、デプスの相互関係が大きく破綻する様子は観られませんでした。圧縮した画像を使用するとアプリの動作が軽くなりますが、画質は低下します。
 
@@ -113,6 +113,6 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 
 ![fig2](https://github.com/user-attachments/assets/15175e2d-41d7-4a30-a5a5-6748065f1ff2)
 
-**Q: The size of the output image is large. Will the depth information be preserved if compressed?**
+**Q: The output imaze size of the Python script is large. Will the depth information be preserved if compressed?**
 
-**A:** Since the output is uncompressed, the file size is large. As an experiment, I checked "Save color values from transparent pixels" in GIMP, set the compression level to 9, compressed and saved the image—with the depth estimation result on the right half—in PNG format, and loaded it into this app. While I haven't confirmed how the depth information is retained, there was no significant distortion in the relative depth relationships. Using the compressed image makes the app run more smoothly, but the image quality deteriorates.
+**A:** The large size is due to the output being uncompressed. I tested by saving the output image with depth estimation results on the right half in PNG format with compression level 9 using GIMP, checking the "Save color values from transparent pixels" option. I then loaded the image into this app. While I haven't confirmed how the depth information is retained, there was no significant distortion in the relative depth relationships. Using the compressed image makes the app run more smoothly, but the image quality deteriorates.
