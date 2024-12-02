@@ -106,7 +106,7 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 - Before running this app, run Looking Glass Bridge [[URL](https://lookingglassfactory.com/software/looking-glass-bridge)].
 - Press **CTRL + E** to activate the screen output of Looking Glass Go.
 - When running within Unity Editor, pressing the **F1 key** will cause an error and interrupt execution, but the Quilt image will be correctly generated. You can resume app execution and continue using it. Note that you can also generate Quilt images from the inspector of `QuiltCapture.cs` inside the Hologram Camera (this is actually the correct way to create Quilt images).
-- Executable files built in Unity Editor will improve performance when running the application.
+- Executable files built with Unity Editor will improve performance when running the application.
 
 ### Q&A
 **Q: What is the difference from a normal RGBD image?**
