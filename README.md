@@ -14,7 +14,7 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 ### 設定方法及び使用方法の概要
 1. Depth Pro を公式ページに記載の方法でインストール。
 2. 1.で Depth Pro をインストールしたフォルダ内に、ビルドして作られたすべてのファイルやフォルダをすべてコピー。[^1]
-3. Looking Glass Go で裸眼立体視したい画像をinputフォルダに入れる。
+3. Looking Glass Go で裸眼立体視したい画像を `input` フォルダに入れる。
 4. ターミナル上で `python depth-pro_rgbde.py` と入力してスクリプトを実行。`output` フォルダに左半分が元画像で右半分がほぼ透明[^2] の PNG ファイルが生成されます。
 5. Looking Glass Bridge [[URL](https://lookingglassfactory.com/software/looking-glass-bridge)] を実行し常駐させます。
 6. スクリプトで出力した画像をアプリで読み込むと Looking Glass Go に立体画像が表示されます。
