@@ -56,13 +56,13 @@ def generate_depth_map(input_path, output_path):
 
         # Save depth information as an image on the right side, デプスマップを右側に画像として保存
         depth_image = cv2.hconcat([cv2.cvtColor(cv2.imread(file_path), cv2.COLOR_BGR2BGRA), cv2.cvtColor(byte_arrays, cv2.COLOR_RGBA2BGRA)])
-        cv2.imwrite(os.path.join(output_path, os.path.splitext(file)[0] + "_RGBDE.png"), depth_image, [int(cv2.IMWRITE_PNG_COMPRESSION), 0])
+        cv2.imwrite(os.path.join(output_path, os.path.splitext(file)[0] + "_RGBDE.png"), depth_image, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
         print(f"Depth map of {file} is saved to {output_path}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='フォルダ内のJPGとPNG画像を処理します。')
+    parser = argparse.ArgumentParser(description='add depth information to all JPG or PNG images in the input folder and write them to the "output" folder')
     parser.add_argument('--folder', type=str, default=DEFAULT_FOLDER_PATH,
-                        help='処理するフォルダのパス（デフォルト: %(default)s）')
+                        help='specify the folder to process(default: %(default)s)')
 
     args = parser.parse_args()
     input_image_path = args.folder  # Set imput image folder path, 入力画像のパスを指定
