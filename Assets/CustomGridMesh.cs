@@ -42,8 +42,8 @@ public class MeshGenerator : MonoBehaviour
     public int counter = 0;
 
     Slider sliderMagnificationRatio;
-    [Range(1f, 200f)]
-    public float magnificationRatio = 7f;
+    [Range(1f, 25f)]
+    public float magnificationRatio = 1f;
     Slider sliderCropDistance;
     [Range(1f, 50f)]
     public float cropDistance = 25f;
@@ -101,7 +101,7 @@ public class MeshGenerator : MonoBehaviour
     // Slider Adjustments, sliderÇÃí≤êÆ
     private void Start()
     {
-        magnificationRatio = 7f;
+        magnificationRatio = 1.0f;
         cropDistance = 25f;
         compressNearest = 0.1f;
         compressFarthest = 2.0f;
@@ -113,7 +113,7 @@ public class MeshGenerator : MonoBehaviour
         sliderCompressFarthest.value = compressFarthest;
         sliderCompressDistance.value = compressDistance;
 
-        vMR.text = sliderMagnificationRatio.value.ToString("f0");
+        vMR.text = sliderMagnificationRatio.value.ToString("f1");
         vCropD.text = sliderCropDistance.value.ToString("f1");
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
@@ -131,7 +131,7 @@ public class MeshGenerator : MonoBehaviour
         sliderCompressFarthest.value = _compressFarthest;
         sliderCompressDistance.value = _compressDistance;
 
-        vMR.text = sliderMagnificationRatio.value.ToString("f0");
+        vMR.text = sliderMagnificationRatio.value.ToString("f1");
         vCropD.text = sliderCropDistance.value.ToString("f1");
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
@@ -153,10 +153,10 @@ public class MeshGenerator : MonoBehaviour
             compressFarthest = sliderCompressFarthest.value;
             compressDistance = sliderCompressDistance.value;
 
-            zValue = Mathf.Min((zValues[i] - zValueMin) * Mathf.Sqrt(magnificationRatio), cropDistance);
+            zValue = Mathf.Min((zValues[i] - zValueMin) * magnificationRatio, cropDistance);
 
             // Adjustment of image depth, âÊëúÇÃãóó£ä¥ÇÃí≤êÆóp
-            if(compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
+            if (compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
             if(compressDistance >(compressFarthest - compressNearest)) { compressDistance = compressFarthest - compressNearest - 0.1f; }
             if(zValue > compressNearest && zValue < compressFarthest)
             {
