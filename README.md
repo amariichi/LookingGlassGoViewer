@@ -32,7 +32,7 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 
 ![fig1](https://github.com/user-attachments/assets/4e8e1507-1e02-4fd2-b5b6-7451270beeb6)
 
-- **F1 キー**を押すと `Recordings` フォルダに Quilt 画像が保存されます。Quilt 画像は LookingGlassStudio で読み込むことができます。なお、画像にメタデータは入っていないので、手動で横11 x 縦６を指定します。
+- **F1 キー**を押すと `Recordings` フォルダに Quilt 画像が保存されます。Quilt 画像は LookingGlassStudio で読み込むことができます。~~なお、画像にメタデータは入っていないので、手動で横11 x 縦６を指定します。~~
 - **QUIT** ボタンでアプリを終了します。
 
 ### Unity Editor への読み込み及び利用
@@ -94,7 +94,7 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 
 ![fig1](https://github.com/user-attachments/assets/4e8e1507-1e02-4fd2-b5b6-7451270beeb6)
 
-- **Save Quilt Image**: Press the **F1 key** to save the Quilt image in the `Recordings` folder. The Quilt image can be loaded into Looking Glass Studio. Note that metadata is not included in the image, so you need to manually specify 11 horizontal x 6 vertical tiles.
+- **Save Quilt Image**: Press the **F1 key** to save the Quilt image in the `Recordings` folder. The Quilt image can be loaded into Looking Glass Studio. ~~Note that metadata is not included in the image, so you need to manually specify 11 horizontal x 6 vertical tiles.~~
 - **Exit App**: Use the **QUIT** button to exit the app.
 
 ### Loading and Using in Unity Editor
