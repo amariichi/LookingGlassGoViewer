@@ -29,7 +29,7 @@ public class QuiltCapButton : MonoBehaviour
         string hour = DateTime.Now.Hour.ToString("00");
         string minute = DateTime.Now.Minute.ToString("00");
         string second = DateTime.Now.Second.ToString("00");
-        string _filePath = filePath + "/Recordings/" + year + month + day + hour + minute + second + "LKG_Quilt.png";
+        string _filePath = filePath + "/Recordings/" + year + month + day + hour + minute + second + "LKG_Quilt_qs11x6a0.56.png";
 
         // When the F1 key is pressed, save the quilt image in the Recordings folder in the execution folder
         // F1キーが押されたら実行フォルダ内のRecordingsフォルダにquilt画像を保存
@@ -43,12 +43,9 @@ public class QuiltCapButton : MonoBehaviour
     IEnumerator Screenshot(string path)
     {
         // It doesn't work properly with unity editor. There is no problem with the build app.
-        // Capture the quilt. It seems that meta data is not entered even if it is set to true.
-        // When registering to looking glass studio, please manually set the number of quilts to 11x6.
-        // Sorry for your inconvenience.
+        // Capture the quilt. 
         // unity editor では動作不良。ビルドアプリでは問題なし。
-        // quiltをキャプチャ。metaデータはtrueにしても入らない様子。
-        // looking glass studioに登録する際は手動でquiltの数を11x6としてください。お手数をおかけします。
+        // quiltをキャプチャ。
         quiltCapture.Screenshot3D(path, false);
         yield return new WaitForSeconds(5f);// Wait 5 seconds.Is it okay ?, 5秒待つ。いいのか？
     }
