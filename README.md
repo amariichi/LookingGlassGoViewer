@@ -3,7 +3,7 @@
 ![app](https://github.com/user-attachments/assets/3d6f9620-8a40-4f43-b5a4-c683f2a371ed) ![app2](https://github.com/user-attachments/assets/211f5bd9-b899-4d91-937b-9387a54fca49)
 
 ### 概要
-付属の Python スクリプトを使用して、Apple が公開した Depth Pro で推定した画像のデプス情報を追加したPNG画像データを作成します。そのPNG画像を読み込み、画像を拡大したり、Looking Glass Go での見え方を調整するツールです。
+付属の Python スクリプトを使用して、Apple が公開した Depth Pro で推定したデプス情報を追加したPNG画像データを作成します。そのPNG画像を読み込み、画像を拡大したり、Looking Glass Go での見え方を調整するツールです。
 Looking Glass Go では、遠くにあるものは大きくぼやけてしまいますが、このツールは奥行きを調整することができるので、元の 2D 画像に近い見え方の裸眼立体視画像（Quilt）を出力することもできます。
 出力した Quilt 画像は LookingGlassStudio で読み込むことができます。
 
@@ -13,7 +13,7 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 
 ### 設定方法及び使用方法の概要
 1. Depth Pro を公式ページに記載の方法でインストール。
-2. 1.で Depth Pro をインストールしたフォルダ内に、Unity Editor でビルドして作られたすべてのファイルやフォルダをすべてコピー。[^1]
+2. 1.で Depth Pro をインストールしたフォルダ内に、Unity Editor でビルドして作られたすべてのファイルやフォルダをコピー。[^1]
 3. Looking Glass Go で裸眼立体視したい画像を `input` フォルダに入れる。
 4. ターミナル上で `python depth-pro_rgbde.py` と入力してスクリプトを実行。`output` フォルダに左半分が元画像で右半分がほぼ透明[^2] の PNG ファイルが生成されます。
 5. Looking Glass Bridge [[URL](https://lookingglassfactory.com/software/looking-glass-bridge)] を実行し常駐させます。
