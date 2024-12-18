@@ -177,7 +177,7 @@ public class ImageSplitter : MonoBehaviour
         {
             SetMeshSize(dropdownValue);
             string filePath = paths[0].ToString();
-            StartCoroutine(SplitAndSaveImage(filePath));
+            StartCoroutine(SplitImage(filePath));
             //Debug.Log(filePath);
         }
     }
@@ -210,7 +210,7 @@ public class ImageSplitter : MonoBehaviour
     /// </summary>
     /// <param name="filePath">選択された画像のパス</param>
     /// <returns>IEnumerator</returns>
-    private IEnumerator SplitAndSaveImage(string filePath)
+    private IEnumerator SplitImage(string filePath)
     {
         //Debug.Log($"Splitting and saving image: {filePath}");
 
@@ -279,31 +279,11 @@ public class ImageSplitter : MonoBehaviour
         leftTexture.SetPixels32(leftPixels);
         leftTexture.Apply();
 
-        // Encode texture to PNG, テクスチャをPNG形式でエンコード
-        byte[] leftBytes = leftTexture.EncodeToPNG();
-
-        // Save left image in SplitImages folder, SplitImages フォルダに保存
-        string assetsDirectoryPath = Path.Combine(UnityEngine.Application.dataPath, "SplitImages");
-        if (!Directory.Exists(assetsDirectoryPath))
-        {
-            Directory.CreateDirectory(assetsDirectoryPath);
-        }
-
-        string leftImagePath = Path.Combine(assetsDirectoryPath, "leftImage.png");
-
-        File.WriteAllBytes(leftImagePath, leftBytes);
-
-        // Unity エディターの場合、AssetDatabase をリフレッシュ
-#if UNITY_EDITOR
-        UnityEditor.AssetDatabase.Refresh();
-#endif
-
         // Load the left image as a sprite and place it on Canvas, 左側の画像をスプライトとしてロードし、Canvas に配置
-        StartCoroutine(LoadSpriteFromPath(leftImagePath));
+        StartCoroutine(LoadSpriteFromTexture(leftTexture));
 
         // Release memory, メモリ解放
         Destroy(originalTexture);
-        Destroy(leftTexture);
         Destroy(rightTexture);
 
         yield return null;
@@ -315,13 +295,8 @@ public class ImageSplitter : MonoBehaviour
     /// </summary>
     /// <param name="path">画像ファイルのパス</param>
     /// <returns>IEnumerator</returns>
-    private IEnumerator LoadSpriteFromPath(string path)
+    private IEnumerator LoadSpriteFromTexture(Texture2D loadedTexture)
     {
-        //Debug.Log($"Loading sprite from path: {path}");
-
-        // Waiting for loading a flie, ファイル読み込みの待機
-        yield return new WaitForSeconds(0.5f);
-
         // Delete any previously displayed images, 前回表示した画像があれば削除
         if (previousImageObject != null)
         {
@@ -330,10 +305,7 @@ public class ImageSplitter : MonoBehaviour
             previousImageObject = null;
         }
 
-        // Load texture as Texture2D, テクスチャをTexture2Dとしてロード
-        byte[] fileData = File.ReadAllBytes(path);
-        Texture2D loadedTexture = new Texture2D(2, 2, TextureFormat.RGBA32, false, false);
-        if (loadedTexture.LoadImage(fileData))
+        if (loadedTexture)
         {
             // Create Sprite, スプライトを作成
             Sprite loadedSprite = Sprite.Create(loadedTexture, new Rect(0, 0, loadedTexture.width, loadedTexture.height),

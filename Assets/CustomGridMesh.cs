@@ -11,6 +11,14 @@ public class MeshGenerator : MonoBehaviour
     // Set object width in m, オブジェクトの横の長さ（メートル）を設定
     public float objectSize = 5f; // 5m
 
+    // Set reference to ImageSplitter script from inspector, ImageSplitterスクリプトへの参照をインスペクターから設定
+    [SerializeField]
+    private ImageSplitter imageSplitter;
+
+    // Set reference to ImageManipulator script from inspector, ImageManipulatorスクリプトへの参照をインスペクターから設定
+    [SerializeField]
+    private ImageManipulator imageManipulator;
+
     // Set ImageSplitter, ImageSplitterスクリプトへの参照をインスペクターから設定
     [SerializeField]
     private ImageCropper imageCropper;
@@ -153,16 +161,16 @@ public class MeshGenerator : MonoBehaviour
             compressFarthest = sliderCompressFarthest.value;
             compressDistance = sliderCompressDistance.value;
 
-            zValue = Mathf.Min((zValues[i] - zValueMin) * magnificationRatio, cropDistance);
+            zValue = Mathf.Min((zValues[i] - zValueMin) * magnificationRatio * (imageManipulator.displayedScale / imageSplitter.InitialScale), cropDistance);
 
             // Adjustment of image depth, 画像の距離感の調整用
             if (compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
-            if(compressDistance >(compressFarthest - compressNearest)) { compressDistance = compressFarthest - compressNearest - 0.1f; }
-            if(zValue > compressNearest && zValue < compressFarthest)
+            if (compressDistance > (compressFarthest - compressNearest)) { compressDistance = compressFarthest - compressNearest - 0.1f; }
+            if (zValue > compressNearest && zValue < compressFarthest)
             {
                 zValue = (compressNearest + (zValue - compressNearest) / (compressFarthest - compressNearest) * compressDistance);
             }
-            else if(zValue >= compressFarthest)
+            else if (zValue >= compressFarthest)
             {
                 zValue = Mathf.Max(compressNearest, (zValue - compressFarthest) + compressDistance + compressNearest);
             }

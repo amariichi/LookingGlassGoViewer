@@ -8238,6 +8238,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectSize: 5
+  imageSplitter: {fileID: 1875398556}
+  imageManipulator: {fileID: 1875398557}
   imageCropper: {fileID: 1875398558}
   sliderMR: {fileID: 1729644235}
   sliderCropD: {fileID: 310122436}
