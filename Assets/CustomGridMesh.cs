@@ -46,19 +46,19 @@ public class MeshGenerator : MonoBehaviour
     public int counter = 0;
 
     Slider sliderMagnificationRatio;
-    [Range(1f, 25f)]
+    [Range(1f, 50f)]
     public float magnificationRatio = 1f;
     Slider sliderCropDistance;
-    [Range(1f, 50f)]
-    public float cropDistance = 25f;
+    [Range(1f, 250f)]
+    public float cropDistance = 50f;
     Slider sliderCompressNearest;
     [Range(0.0f,10f)]
     public float compressNearest = 0.1f;
     Slider sliderCompressFarthest;
-    [Range(1.0f, 50f)]
+    [Range(1.0f, 99.9f)]
     public float compressFarthest = 2.0f;
     Slider sliderCompressDistance;
-    [Range(0.1f, 25.0f)]
+    [Range(0.1f, 99.9f)]
     public float compressDistance = 1.9f;
 
     TextMeshProUGUI vMR;
@@ -106,7 +106,7 @@ public class MeshGenerator : MonoBehaviour
     private void Start()
     {
         magnificationRatio = 1.0f;
-        cropDistance = 25f;
+        cropDistance = 50f;
         compressNearest = 0.1f;
         compressFarthest = 2.0f;
         compressDistance = 1.9f;
@@ -118,7 +118,7 @@ public class MeshGenerator : MonoBehaviour
         sliderCompressDistance.value = compressDistance;
 
         vMR.text = sliderMagnificationRatio.value.ToString("f1");
-        vCropD.text = sliderCropDistance.value.ToString("f1");
+        vCropD.text = sliderCropDistance.value.ToString("f0");
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
         vCompD.text = sliderCompressDistance.value.ToString("f1");        
@@ -136,7 +136,7 @@ public class MeshGenerator : MonoBehaviour
         sliderCompressDistance.value = _compressDistance;
 
         vMR.text = sliderMagnificationRatio.value.ToString("f1");
-        vCropD.text = sliderCropDistance.value.ToString("f1");
+        vCropD.text = sliderCropDistance.value.ToString("f0");
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
         vCompD.text = sliderCompressDistance.value.ToString("f1");
@@ -170,6 +170,8 @@ public class MeshGenerator : MonoBehaviour
             {
                 zValue = Mathf.Max(compressNearest, (zValue - compressFarthest) + compressDistance + compressNearest);
             }
+            zValue = Mathf.Log(1 + zValue);
+            //zValue = Mathf.Sqrt(zValue);
             return zValue;
         //      float x = vertices[i].x;
         //      float y = vertices[i].y;
