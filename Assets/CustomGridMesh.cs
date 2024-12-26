@@ -49,7 +49,7 @@ public class MeshGenerator : MonoBehaviour
     [Range(1f, 50f)]
     public float magnificationRatio = 1f;
     Slider sliderCropDistance;
-    [Range(1f, 250f)]
+    [Range(1f, 99.9f)]
     public float cropDistance = 50f;
     Slider sliderCompressNearest;
     [Range(0.0f,10f)]
@@ -118,7 +118,7 @@ public class MeshGenerator : MonoBehaviour
         sliderCompressDistance.value = compressDistance;
 
         vMR.text = sliderMagnificationRatio.value.ToString("f1");
-        vCropD.text = sliderCropDistance.value.ToString("f0");
+        vCropD.text = sliderCropDistance.value.ToString("f1");
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
         vCompD.text = sliderCompressDistance.value.ToString("f1");        
@@ -136,7 +136,7 @@ public class MeshGenerator : MonoBehaviour
         sliderCompressDistance.value = _compressDistance;
 
         vMR.text = sliderMagnificationRatio.value.ToString("f1");
-        vCropD.text = sliderCropDistance.value.ToString("f0");
+        vCropD.text = sliderCropDistance.value.ToString("f1");
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
         vCompD.text = sliderCompressDistance.value.ToString("f1");
