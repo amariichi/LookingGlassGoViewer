@@ -158,6 +158,7 @@ public class MeshGenerator : MonoBehaviour
             compressDistance = sliderCompressDistance.value;
 
             zValue = Mathf.Min((zValues[i] - zValueMin) * imageManipulator.displayedScale, cropDistance);
+            zValue = Mathf.Log(1 + zValue) * Mathf.Pow(magnificationRatio, 1.0f);
 
             // Adjustment of image depth, ‰æ‘œ‚Ì‹——£Š´‚Ì’²®—p
             if (compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
@@ -170,8 +171,7 @@ public class MeshGenerator : MonoBehaviour
             {
                 zValue = Mathf.Max(compressNearest, (zValue - compressFarthest) + compressDistance + compressNearest);
             }
-            zValue = Mathf.Log(1 + zValue) * magnificationRatio;
-            //zValue = Mathf.Sqrt(zValue);
+
             return zValue;
         //      float x = vertices[i].x;
         //      float y = vertices[i].y;
