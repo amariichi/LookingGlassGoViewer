@@ -290,7 +290,7 @@ public class ImageSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定されたパスからスプライトをロードし、UI の Image コンポーネントで表示します。
+    /// 指定されたテクスチャを UI の Image コンポーネントで表示します。
     /// 前回表示した画像があれば削除します。
     /// </summary>
     /// <param name="path">画像ファイルのパス</param>
@@ -333,7 +333,7 @@ public class ImageSplitter : MonoBehaviour
             float scaleFactor = CalculateScaleFactor(_originalWidth, _originalHeight, TARGET_WIDTH, TARGET_HEIGHT);
             _scale = scaleFactor;
 
-            Vector2 newSize = CalculateScaledSize(_originalWidth, _originalHeight, TARGET_WIDTH, TARGET_HEIGHT, scaleFactor);
+            Vector2 newSize = CalculateScaledSize(_originalWidth, _originalHeight, scaleFactor);
             rectTransform.sizeDelta = newSize;
 
             // Set sortingOrder of CanvasRenderer of the image, ImageのCanvasRendererのsortingOrderを設定
@@ -408,7 +408,7 @@ public class ImageSplitter : MonoBehaviour
     /// <param name="maxHeight">最大高さ</param>
     /// <param name="scaleFactor">スケーリング係数</param>
     /// <returns>新しいサイズ (幅, 高さ)</returns>
-    private Vector2 CalculateScaledSize(int originalWidth, int originalHeight, float maxWidth, float maxHeight, float scaleFactor)
+    private Vector2 CalculateScaledSize(int originalWidth, int originalHeight, float scaleFactor)
     {
         float newWidth = originalWidth * scaleFactor;
         float newHeight = originalHeight * scaleFactor;
