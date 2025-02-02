@@ -9,7 +9,9 @@ Looking Glass Go では、遠くにあるものは大きくぼやけてしまい
 
 python スクリプトの実行には、別途 Depth Pro [[URL](https://github.com/apple/ml-depth-pro)] のインストールが必要です。
 
-### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.4)
+**V1.1.5:** GitHub Copilot に ImageCropper.cs のコードを改善してもらい、それをそのまま適用したら動いたので反映しました。中身は変わってないです。少し動作が速くなったかもしれません。
+
+### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.5)
 
 ### 設定方法及び使用方法の概要
 1. Depth Pro を公式ページに記載の方法でインストール。
@@ -71,7 +73,9 @@ The output Quilt image can be loaded into Looking Glass Studio.
 
 To run the Python script, you need to install Depth Pro separately. [[URL](https://github.com/apple/ml-depth-pro)]
 
-### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.4)
+**V1.1.5:** I had GitHub Copilot improve the code in ImageCropper.cs, and since it worked when applied as is, I implemented it. The content remains unchanged. It might have run a little faster.
+
+### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.5)
 
 ### Summary of Setup and Usage
 1. Install Depth Pro according to the method described on the official page.
