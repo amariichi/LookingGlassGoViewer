@@ -116,7 +116,7 @@ public class ImageCropper : MonoBehaviour
 
     private void SetFrameSize()
     {
-        if (360 / originalWidth > 640 / originalHeight)
+        if ((float)originalWidth / (float)originalHeight <= 0.5625f)
         {
             frameHeight = originalHeight;
             frameWidth = (int)(originalHeight * 9 / 16);
