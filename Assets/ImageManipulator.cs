@@ -2,164 +2,123 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class ImageManipulator : MonoBehaviour, IPointerDownHandler, IDragHandler
+/// <summary>
+/// ç”»åƒã®ãƒ‰ãƒ©ãƒƒã‚°ãƒ»ã‚ºãƒ¼ãƒ ãƒ»ãƒªã‚»ãƒƒãƒˆæ“ä½œã‚’æä¾›ã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+/// </summary>
+public class ImageManipulator : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
-    // Reference to ImageSplitter, ImageSplitterƒXƒNƒŠƒvƒg‚Ö‚ÌQÆ‚ğƒCƒ“ƒXƒyƒNƒ^[‚©‚çİ’è
-    [SerializeField]
-    private ImageSplitter imageSplitter;
+    // --- Inspectorã§è¨­å®šå¯èƒ½ãªãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ ---
+    [SerializeField] private ImageSplitter imageSplitter; // ImageSplitterã¸ã®å‚ç…§
 
-    // Reference to Left Image, ¶‘¤‚ÌImageƒRƒ“ƒ|[ƒlƒ“ƒg‚Ö‚ÌQÆ
-    public Image leftImageSprite;
+    // --- å…¬é–‹ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ ---
+    public Image leftImageSprite; // æ“ä½œå¯¾è±¡ã®Image
 
-    // Variables for Drugging, ƒhƒ‰ƒbƒO—p‚Ì•Ï”
+    // --- ãƒ‰ãƒ©ãƒƒã‚°æ“ä½œç”¨ ---
     private RectTransform rectTransform;
     private Vector2 originalLocalPointerPosition;
     private Vector3 originalPanelLocalPosition;
 
-    // Variables for Zooming, ƒY[ƒ€—p‚Ì•Ï”
-    public float zoomSpeed = 0.2f; // Šg‘åk¬‚Ì‘¬“x
-    public float minScale = 1f;  // Å¬ƒXƒP[ƒ‹
-    public float maxScale = 15f;    // Å‘åƒXƒP[ƒ‹
+    // --- ã‚ºãƒ¼ãƒ æ“ä½œç”¨ ---
+    [SerializeField] public float zoomSpeed = 0.2f; // ã‚ºãƒ¼ãƒ é€Ÿåº¦
+    [SerializeField] public float minScale = 1f;     // æœ€å°ã‚¹ã‚±ãƒ¼ãƒ«
+    [SerializeField] public float maxScale = 15f;    // æœ€å¤§ã‚¹ã‚±ãƒ¼ãƒ«
 
-    // Variables for moving restriction, ˆÚ“®§ŒÀ—p‚Ì•Ï”
+    // --- ç§»å‹•åˆ¶é™ç”¨ ---
     private Vector3 initialLocalPosition;
-    public float maxMoveX;   // ¶‰E‚ÌˆÚ“®§ŒÀiƒsƒNƒZƒ‹A’†S‚©‚ç‚ÌˆÚ“®‹——£j
-    public float maxMoveY;   // ã‰º‚ÌˆÚ“®§ŒÀiƒsƒNƒZƒ‹A’†S‚©‚ç‚ÌˆÚ“®‹——£j
-    private float displayWidth; //‰æ–Ê•\¦ã‚Ì‰¡•ƒsƒNƒZƒ‹”
-    private float displayHeight; //‰æ–Ê•\¦ã‚Ìc•ƒsƒNƒZƒ‹”
-    private float offset; //imageSplitter.OFFSET’l‚Ì‘ã“üæ
+    [SerializeField] public float maxMoveX;   // æ¨ªæ–¹å‘ã®ç§»å‹•åˆ¶é™
+    [SerializeField] public float maxMoveY;   // ç¸¦æ–¹å‘ã®ç§»å‹•åˆ¶é™
+    private float displayWidth;  // è¡¨ç¤ºç”»åƒã®å¹…
+    private float displayHeight; // è¡¨ç¤ºç”»åƒã®é«˜ã•
+    private float offset;        // ã‚ªãƒ•ã‚»ãƒƒãƒˆå€¤
 
-    // Variables for Double Click, ƒ_ƒuƒ‹ƒNƒŠƒbƒN—p‚Ì•Ï”
-    //private bool isDoubleClickStart; //ƒ^ƒbƒv”F¯’†‚Ìƒtƒ‰ƒO
-    //private float doubleTapTime = 0;
-
-    // Flag for initialization, ‰Šú‰»ƒtƒ‰ƒO
+    // --- åˆæœŸåŒ–ãƒ•ãƒ©ã‚° ---
     private bool isInitialized = false;
 
-    // displayedPositionX‚Ì“à•”ƒtƒB[ƒ‹ƒhiƒCƒ“ƒXƒyƒNƒ^[‚Åİ’è‰Â”\j
-    [SerializeField]
-    private int _displayedPositionX = 0;
+    // --- è¡¨ç¤ºãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ ---
+    [SerializeField] private int _displayedPositionX = 0;
+    [SerializeField] private int _displayedPositionY = 0;
+    [SerializeField] private float _displayedScale = 1f;
+
+    public int displayedPositionX => _displayedPositionX;
+    public int displayedPositionY => _displayedPositionY;
+    public float displayedScale => _displayedScale;
 
     /// <summary>
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚ÈdisplayedPositionXƒvƒƒpƒeƒBi“Ç‚İæ‚èê—pjB
-    /// •\¦‰æ‘œ‚ÌxÀ•W’l(•\¦ã‚ÌƒZƒ“ƒ^[‚OjB
+    /// ç”»åƒç”Ÿæˆæ™‚ã®åˆæœŸåŒ–ãƒãƒ³ãƒ‰ãƒ©
     /// </summary>
-    public int displayedPositionX
-    {
-        get { return _displayedPositionX; }
-    }
-
-    // displayedPositionY‚Ì“à•”ƒtƒB[ƒ‹ƒhiƒCƒ“ƒXƒyƒNƒ^[‚Åİ’è‰Â”\j
-    [SerializeField]
-    private int _displayedPositionY = 0;
-
-    /// <summary>
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚ÈdisplayedPositionYƒvƒƒpƒeƒBi“Ç‚İæ‚èê—pjB
-    /// •\¦‰æ‘œ‚ÌyÀ•W’lB
-    /// </summary>
-    public int displayedPositionY
-    {
-        get { return _displayedPositionY; }
-    }
-
-    // displayedScale‚Ì“à•”ƒtƒB[ƒ‹ƒhiƒCƒ“ƒXƒyƒNƒ^[‚Åİ’è‰Â”\j
-    [SerializeField]
-    private float _displayedScale = 1f;
-
-    /// <summary>
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚ÈdisplayedScaleƒvƒƒpƒeƒBi“Ç‚İæ‚èê—pjB
-    /// ‰æ‘œ‚ÌŠg‘å”{—¦’lB
-    /// </summary>
-    public float displayedScale
-    {
-        get { return _displayedScale; }
-    }
-
-    /// <summary>
-    /// Event Handler, called when an image is created, ‰æ‘œ¶¬‚ÉŒÄ‚Ño‚³‚ê‚éƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰[
-    /// </summary>
-    /// <param name="imageObject">¶¬‚³‚ê‚½Image‚ÌGameObject</param>
-    /// <param name="sprite">¶¬‚³‚ê‚½Sprite</param>
+    /// <param name="imageObject">ç”Ÿæˆã•ã‚ŒãŸImageã®GameObject</param>
+    /// <param name="sprite">ç”Ÿæˆã•ã‚ŒãŸSprite</param>
     public void OnImageCreatedHandler(GameObject imageObject, Sprite sprite)
     {
-        if (imageObject == null)
-        {
-            //Debug.LogError("ImageObject‚ªnull‚Å‚·B");
-            return;
-        }
+        if (imageObject == null) return;
 
-        // Set an image componet as "LeftImageSprite", "LeftImageSprite"‚Æ‚µ‚ÄImageƒRƒ“ƒ|[ƒlƒ“ƒg‚ğİ’è
+        // æ“ä½œå¯¾è±¡Imageã‚’å–å¾—
         leftImageSprite = imageObject.GetComponent<Image>();
-        if (leftImageSprite == null)
-        {
-            //Debug.LogError("¶¬‚³‚ê‚½GameObject‚ÉImageƒRƒ“ƒ|[ƒlƒ“ƒg‚ªŠÜ‚Ü‚ê‚Ä‚¢‚Ü‚¹‚ñB");
-            return;
-        }
+        if (leftImageSprite == null) return;
 
-        // Setting Sprite, Sprite‚ğİ’è
+        // Spriteã‚’è¨­å®š
         leftImageSprite.sprite = sprite;
 
-        // Get RectTransform, RectTransform‚ğæ“¾
+        // RectTransformã‚’å–å¾—
         rectTransform = leftImageSprite.GetComponent<RectTransform>();
-        if (rectTransform == null)
-        {
-            //Debug.LogError("LeftImageSprite‚ÉRectTransform‚ª‚ ‚è‚Ü‚¹‚ñB");
-            return;
-        }
+        if (rectTransform == null) return;
 
-        // Record Initial Position, ‰ŠúˆÊ’u‚ğ‹L˜^
+        // åˆæœŸä½ç½®ã‚’è¨˜éŒ²
         initialLocalPosition = rectTransform.localPosition;
 
-        // Flag of initialized, ‰Šú‰»Š®—¹ƒtƒ‰ƒO‚ğİ’è
+        // åˆæœŸåŒ–ãƒ•ãƒ©ã‚°
         isInitialized = true;
 
-        // Set display size and potision, displayƒTƒCƒY‚ÆêŠ‚Ìİ’è
+        // è¡¨ç¤ºã‚µã‚¤ã‚ºãƒ»ä½ç½®ã‚’è¨­å®š
         displayWidth = imageSplitter.OriginalWidth * imageSplitter.InitialScale;
         displayHeight = imageSplitter.OriginalHeight * imageSplitter.InitialScale;
         offset = imageSplitter.OFFSET;
 
-        // Setting the drag range, ƒhƒ‰ƒbƒO‚Ì‰Â“®”ÍˆÍ‚Ìİ’è
+        // ãƒ‰ãƒ©ãƒƒã‚°ç¯„å›²ã‚’è¨­å®š
         maxMoveX = Mathf.Min(144f, displayWidth / 2 - 36);
         maxMoveY = Mathf.Min(284f, displayHeight / 2 - 36);
     }
 
+    /// <summary>
+    /// æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã°ã‚Œã‚‹ã€‚ã‚ºãƒ¼ãƒ ãƒ»ãƒªã‚»ãƒƒãƒˆãƒ»è¡¨ç¤ºãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿æ›´æ–°ã‚’è¡Œã†
+    /// </summary>
     void Update()
     {
-        if (!isInitialized)
-            return;
+        if (!isInitialized) return;
 
-        // Zooming with mouse wheel, ƒ}ƒEƒXƒzƒC[ƒ‹‚É‚æ‚éƒY[ƒ€ˆ—
+        // ãƒã‚¦ã‚¹ãƒ›ã‚¤ãƒ¼ãƒ«ã§ã‚ºãƒ¼ãƒ 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0f && rectTransform != null)
         {
-             Vector3 scale = rectTransform.localScale;
+            Vector3 scale = rectTransform.localScale;
             scale += Vector3.one * scroll * zoomSpeed;
-            // Scaling limitation, ƒXƒP[ƒ‹‚ğ§ŒÀ
             scale.x = Mathf.Clamp(scale.x, minScale, maxScale);
             scale.y = Mathf.Clamp(scale.y, minScale, maxScale);
-            scale.z = 1f; // z²‚ÌƒXƒP[ƒ‹‚Í1‚ÉŒÅ’è
+            scale.z = 1f;
             rectTransform.localScale = scale;
         }
 
-        // Right click to set position default, ‰EƒNƒŠƒbƒN‚ÉÅ‰‚ÌêŠ‚É–ß‚·
+        // å³ã‚¯ãƒªãƒƒã‚¯ã§ä½ç½®ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ã‚’ãƒªã‚»ãƒƒãƒˆ
         if (Input.GetMouseButtonDown(1))
         {
             rectTransform.localPosition = initialLocalPosition;
             rectTransform.localScale = Vector3.one;
         }
 
+        // è¡¨ç¤ºãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’æ›´æ–°
         _displayedPositionX = (int)(rectTransform.localPosition.x - offset);
         _displayedPositionY = (int)rectTransform.localPosition.y;
         _displayedScale = rectTransform.localScale.x;
     }
 
-    // Mouse button pushed, ƒ}ƒEƒXƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚Æ‚«‚Ìˆ—
+    /// <summary>
+    /// ãƒã‚¦ã‚¹ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã®å‡¦ç†
+    /// </summary>
     public void OnPointerDown(PointerEventData data)
     {
-        if (rectTransform == null || !isInitialized)
-            return;
+        if (rectTransform == null || !isInitialized) return;
 
-        // Record initial position, ‰ŠúˆÊ’u‚ğ‹L˜^
+        // åˆæœŸä½ç½®ã‚’è¨˜éŒ²
         originalPanelLocalPosition = rectTransform.localPosition;
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -169,28 +128,33 @@ public class ImageManipulator : MonoBehaviour, IPointerDownHandler, IDragHandler
             out originalLocalPointerPosition);
     }
 
-    // On dragging, ƒhƒ‰ƒbƒO’†‚Ìˆ—
+    public void OnPointerUp(PointerEventData data)
+    {
+        // ä½•ã‚‚ã—ãªã„ï¼ˆå°†æ¥ã®æ‹¡å¼µç”¨ï¼‰
+    }
+
+    /// <summary>
+    /// ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã®å‡¦ç†
+    /// </summary>
     public void OnDrag(PointerEventData data)
     {
-        if (rectTransform == null || !isInitialized)
-            return;
+        if (rectTransform == null || !isInitialized) return;
 
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
         Vector2 localPointerPosition;
-        // Convert current pointer position to local coordinates, Œ»İ‚Ìƒ|ƒCƒ“ƒ^ˆÊ’u‚ğƒ[ƒJƒ‹À•W‚É•ÏŠ·
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             parentRect,
             data.position,
             data.pressEventCamera,
             out localPointerPosition);
 
-        // calculate offset, ƒIƒtƒZƒbƒg‚ğŒvZ
+        // ã‚ªãƒ•ã‚»ãƒƒãƒˆè¨ˆç®—
         Vector3 offsetToOriginal = localPointerPosition - originalLocalPointerPosition;
 
-        // Set new position, V‚µ‚¢ˆÊ’u‚ğİ’è
+        // æ–°ã—ã„ä½ç½®ã‚’è¨ˆç®—
         Vector3 newLocalPosition = originalPanelLocalPosition + new Vector3(offsetToOriginal.x, offsetToOriginal.y, 0);
 
-        // Apply movement restrictions, ˆÚ“®§ŒÀ‚ğ“K—p
+        // ç§»å‹•åˆ¶é™ã‚’é©ç”¨
         Vector3 scale = rectTransform.localScale;
         newLocalPosition.x = Mathf.Clamp(newLocalPosition.x, initialLocalPosition.x - scale.x * displayWidth / 2 - maxMoveX, initialLocalPosition.x + scale.x * displayWidth / 2 + maxMoveX);
         newLocalPosition.y = Mathf.Clamp(newLocalPosition.y, initialLocalPosition.y - scale.y * displayHeight / 2 - maxMoveY, initialLocalPosition.y + scale.y * displayHeight / 2 + maxMoveY);

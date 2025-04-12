@@ -3,187 +3,77 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.IO;
-//using System.Windows.Forms; // Import System.Windows.Forms –¼‘O‹óŠÔ‚ğƒCƒ“ƒ|[ƒg
-//using System;
-//using System.Linq; // for basic functions, Šî–{“I‚È‹@”\—p
 using SFB;
 using System;
 
-// Definition of custom UnityEvent, UnityEvent ‚ÌƒJƒXƒ^ƒ€’è‹`
+// Definition of custom UnityEvent
 [System.Serializable]
 public class ImageCreatedEvent : UnityEvent<GameObject, Sprite> { }
 
 public class ImageSplitter : MonoBehaviour
 {
-    // Target frame size (in pixels), –Ú•W‚Ì˜gƒTƒCƒYiƒsƒNƒZƒ‹’PˆÊj
-    private const int TARGET_WIDTH = 360;
-    private const int TARGET_HEIGHT = 640;
+    // --- å®šæ•° ---
+    private const int TARGET_WIDTH = 360;   // å·¦ç”»åƒã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆå¹…ï¼ˆãƒ”ã‚¯ã‚»ãƒ«ï¼‰
+    private const int TARGET_HEIGHT = 640;  // å·¦ç”»åƒã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆé«˜ã•ï¼ˆãƒ”ã‚¯ã‚»ãƒ«ï¼‰
 
-    // Variable that holds a reference to the last displayed image, ‘O‰ñ•\¦‚µ‚½‰æ‘œ‚ÌQÆ‚ğ•Û‚·‚é•Ï”
-    private GameObject previousImageObject;
+    // --- Inspectorã§è¨­å®šå¯èƒ½ãªãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ ---
+    [SerializeField] private float _offset = 90f; // å·¦ç”»åƒã®è¡¨ç¤ºä½ç½®ã‚ªãƒ•ã‚»ãƒƒãƒˆï¼ˆå³æ–¹å‘ï¼‰
+    [SerializeField] private int _meshX;          // ãƒ¡ãƒƒã‚·ãƒ¥ã®æ¨ªåˆ†å‰²æ•°
+    [SerializeField] private int _meshY;          // ãƒ¡ãƒƒã‚·ãƒ¥ã®ç¸¦åˆ†å‰²æ•°
+    [SerializeField] public GameObject dropdownItem; // ãƒ¡ãƒƒã‚·ãƒ¥è§£åƒåº¦é¸æŠç”¨ãƒ‰ãƒ­ãƒƒãƒ—ãƒ€ã‚¦ãƒ³
+    [SerializeField] public ImageCreatedEvent OnImageCreated; // ç”»åƒç”Ÿæˆæ™‚ã‚¤ãƒ™ãƒ³ãƒˆ
 
-    // Internal fields of OFFSET (configurable in Inspector), OFFSET‚Ì“à•”ƒtƒB[ƒ‹ƒhiƒCƒ“ƒXƒyƒNƒ^[‚Åİ’è‰Â”\j
-    [SerializeField]
-    private float _offset = 90f;
+    // --- å†…éƒ¨çŠ¶æ…‹ ---
+    private GameObject previousImageObject; // å‰å›è¡¨ç¤ºã—ãŸç”»åƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+    private Dropdown dropdown;              // ãƒ‰ãƒ­ãƒƒãƒ—ãƒ€ã‚¦ãƒ³ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+    private int dropdownValue;              // ãƒ‰ãƒ­ãƒƒãƒ—ãƒ€ã‚¦ãƒ³ã®é¸æŠå€¤
 
-    /// <summary>
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚ÈOFFSETƒvƒƒpƒeƒBi“Ç‚İæ‚èê—pjB
-    /// ‰æ‘œ‚ÌxÀ•W‚ğ‰E‚É‚¸‚ç‚·‚½‚ß‚ÌƒIƒtƒZƒbƒg’lB
-    /// </summary>
-    public float OFFSET
-    {
-        get { return _offset; }
-    }
+    [SerializeField] private int _originalWidth = 0;   // å…ƒç”»åƒã®å¹…ï¼ˆå·¦ç”»åƒï¼‰
+    [SerializeField] private int _originalHeight = 0;  // å…ƒç”»åƒã®é«˜ã•ï¼ˆå·¦ç”»åƒï¼‰
+    [SerializeField] private float _scale = 1f;        // å·¦ç”»åƒã®ã‚¹ã‚±ãƒ¼ãƒ«
 
-    // originalWidth‚Ì“à•”ƒtƒB[ƒ‹ƒh
-    [SerializeField]
-    private int _originalWidth = 0;
+    private float[,] _pixelZMatrix; // å³ç”»åƒã‹ã‚‰å¾—ãŸæ·±åº¦æƒ…å ±
+    private float _pixelZMax;       // æ·±åº¦ã®æœ€å¤§å€¤
 
-    /// <summary>
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚ÈOriginalWidthƒvƒƒpƒeƒBi“Ç‚İæ‚èê—pjB
-    /// Width after separated, •ªŠ„Œã‚ÌleftImage.png‚Ì•‚ğ¦‚µ‚Ü‚·B
-    /// </summary>
-    public int OriginalWidth
-    {
-        get { return _originalWidth; }
-    }
-
-    // originalHeight‚Ì“à•”ƒtƒB[ƒ‹ƒh
-    [SerializeField]
-    private int _originalHeight = 0;
-
-    /// <summary>
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚ÈOriginalHeightƒvƒƒpƒeƒBi“Ç‚İæ‚èê—pjB
-    /// Height after separeted, •ªŠ„Œã‚ÌleftImage.png‚Ì‚‚³‚ğ¦‚µ‚Ü‚·B
-    /// </summary>
-    public int OriginalHeight
-    {
-        get { return _originalHeight; }
-    }
-
-    // scale‚Ì“à•”ƒtƒB[ƒ‹ƒhiŠî€ƒXƒP[ƒ‹j
-    [SerializeField]
-    private float _scale = 1f;
-
-    /// <summary>
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚ÈScaleƒvƒƒpƒeƒBi“Ç‚İæ‚èê—pjB
-    /// ‰æ‘œ‚ÌŠî€ƒXƒP[ƒŠƒ“ƒOŒW”B
-    /// </summary>
-    public float InitialScale
-    {
-        get { return _scale; }
-    }
-
-    // pixelZdata‚Ì“à•”ƒtƒB[ƒ‹ƒh
-    private float[,] _pixelZMatrix;
-
-    /// <summary>
-    /// Right side depth data (UInt32 stored in RGBA32) float[] (read-only) that can be referenced from other scripts.
-    /// ‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚çQÆ‰Â”\‚È‰E‘¤ƒfƒvƒXƒf[ƒ^iRGBA32‚ÉUInt32‚ªŠi”[jfloat[]i“Ç‚İæ‚èê—pjB
-    /// ‰œs‚«QÆ‚ÌŒ³ƒf[ƒ^
-    /// </summary>
-    public float[,] PixelZMatrix
-    {
-        get { return _pixelZMatrix; }
-    }
-
-    // pixelZdata‚ÌÅ‘å’l‚Ì“à•”ƒtƒB[ƒ‹ƒh
-    private float _pixelZMax;
-    public float PixelZMax
-    {
-        get { return _pixelZMax; }
-    }
-
-    // ƒƒbƒVƒ…ƒTƒCƒY‚ÌDropdownƒŠƒXƒg
-    [SerializeField]
-    public GameObject dropdownItem;
-    Dropdown dropdown;
-    private int dropdownValue;
-
-    // Mesh Width ‚Ì“à•”ƒtƒB[ƒ‹ƒh
-    [SerializeField]
-    private int _meshX;
-
-    /// <summary>
-    /// Choosed mesh width from dropdown list, ƒhƒƒbƒvƒ_ƒEƒ“‚Ì‘I‘ğŒ‹‰Ê‚É‚æ‚éƒƒbƒVƒ…‚Ì•‚Ì”
-    /// </summary>
-    public int meshX
-    {
-        get { return _meshX; }
-    }
-
-    // Mesh Height ‚Ì“à•”ƒtƒB[ƒ‹ƒh
-    [SerializeField]
-    private int _meshY;
-
-    /// <summary>
-    /// Choosed mesh height from dropdown list, ƒhƒƒbƒvƒ_ƒEƒ“‚Ì‘I‘ğŒ‹‰Ê‚É‚æ‚éƒƒbƒVƒ…‚Ìc‚Ì”
-    /// </summary>
-    public int meshY
-    {
-        get { return _meshY; }
-    }
-
-    /// <summary>
-    /// Image‚ªì¬‚³‚ê‚½Û‚É”­¶‚·‚éUnityEventB
-    /// ˆø”‚Æ‚µ‚ÄV‚µ‚­ì¬‚³‚ê‚½Image‚ÌGameObject‚ÆSprite‚ğ“n‚µ‚Ü‚·B
-    /// </summary>
-    [SerializeField]
-    public ImageCreatedEvent OnImageCreated;
+    // --- ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ ---
+    public float OFFSET => _offset;                 // ã‚ªãƒ•ã‚»ãƒƒãƒˆå€¤
+    public int OriginalWidth => _originalWidth;     // å·¦ç”»åƒã®å¹…
+    public int OriginalHeight => _originalHeight;   // å·¦ç”»åƒã®é«˜ã•
+    public float InitialScale => _scale;            // å·¦ç”»åƒã®ã‚¹ã‚±ãƒ¼ãƒ«
+    public float[,] PixelZMatrix => _pixelZMatrix;  // æ·±åº¦ãƒãƒˆãƒªã‚¯ã‚¹
+    public float PixelZMax => _pixelZMax;           // æ·±åº¦ã®æœ€å¤§å€¤
+    public int meshX => _meshX;                     // ãƒ¡ãƒƒã‚·ãƒ¥æ¨ªåˆ†å‰²æ•°
+    public int meshY => _meshY;                     // ãƒ¡ãƒƒã‚·ãƒ¥ç¸¦åˆ†å‰²æ•°
 
     private void Start()
     {
         dropdown = dropdownItem.GetComponent<Dropdown>();
-        //dropdown = GameObject.Find("Dropdown").GetComponent<Dropdown>();
     }
 
+    /// <summary>
+    /// ãƒ‰ãƒ­ãƒƒãƒ—ãƒ€ã‚¦ãƒ³é¸æŠæ™‚ã®ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯
+    /// </summary>
     public void OnDropdownSelected(int value)
     {
         dropdownValue = value;
     }
 
-
     /// <summary>
-    /// Attached to "Load" button, ƒ{ƒ^ƒ“‚Ì OnClick ƒCƒxƒ“ƒg‚ÉƒAƒ^ƒbƒ`‚·‚éƒƒ\ƒbƒhB
-    /// ƒtƒ@ƒCƒ‹ƒ_ƒCƒAƒƒO‚ğŠJ‚«A‘I‘ğ‚³‚ê‚½‰æ‘œ‚ğˆ—‚µ‚Ü‚·B
+    /// ã€ŒLoadã€ãƒœã‚¿ãƒ³ã«ã‚¢ã‚¿ãƒƒãƒã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ã€‚ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã‚’é¸æŠã—ã€åˆ†å‰²å‡¦ç†ã‚’é–‹å§‹ã™ã‚‹ã€‚
     /// </summary>
     public void OpenAndProcessImage()
     {
-        //Debug.Log("OpenAndProcessImage called.");
-        /*
-                // OpenFileDialog ‚Ìİ’è
-                OpenFileDialog openFileDialog = new OpenFileDialog
-                {
-                    Filter = "PNG Files|*.png",
-                    Title = "Select a PNG Image",
-                    RestoreDirectory = true
-                };
-
-                // ƒtƒ@ƒCƒ‹ƒ_ƒCƒAƒƒO‚ğ•\¦
-                DialogResult result = openFileDialog.ShowDialog();
-
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
-                {
-                    string filePath = openFileDialog.FileName;
-                    StartCoroutine(SplitAndSaveImage(filePath));
-                }
-                else
-                {
-                    //Debug.LogWarning("No file selected or dialog was canceled.");
-                }
-        */
-        var paths = StandaloneFileBrowser.OpenFilePanel("Select RGBDE PNG Image", "", "png", false);
+        var paths = StandaloneFileBrowser.OpenFilePanel("RGBDE PNGç”»åƒã‚’é¸æŠ", "", "png", false);
         if (paths.Length > 0 && !string.IsNullOrEmpty(paths[0]))
         {
             SetMeshSize(dropdownValue);
-            string filePath = paths[0].ToString();
+            string filePath = paths[0];
             StartCoroutine(SplitImage(filePath));
-            //Debug.Log(filePath);
         }
     }
 
     /// <summary>
-    /// List of dropdown for mesh resolutions, Dropdown ƒŠƒXƒg‚ÉŠî‚Ã‚­ƒƒbƒVƒ…‰ğ‘œ“x‚ÌƒvƒƒpƒeƒBİ’è
+    /// ãƒ‰ãƒ­ãƒƒãƒ—ãƒ€ã‚¦ãƒ³ã®é¸æŠå€¤ã«å¿œã˜ã¦ãƒ¡ãƒƒã‚·ãƒ¥è§£åƒåº¦ã‚’è¨­å®š
     /// </summary>
     private void SetMeshSize(int value)
     {
@@ -202,41 +92,37 @@ public class ImageSplitter : MonoBehaviour
             _meshX = 1440;
             _meshY = 2560;
         }
-
     }
 
     /// <summary>
-    /// ‰æ‘œ‚ğ•ªŠ„‚µA•Û‘¶‚·‚éƒRƒ‹[ƒ`ƒ“B
+    /// ç”»åƒã‚’åˆ†å‰²ã—ã€æ·±åº¦æƒ…å ±ã‚’æŠ½å‡ºã—ã¦ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã«ã‚»ãƒƒãƒˆã™ã‚‹
     /// </summary>
-    /// <param name="filePath">‘I‘ğ‚³‚ê‚½‰æ‘œ‚ÌƒpƒX</param>
+    /// <param name="filePath">é¸æŠã•ã‚ŒãŸç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹</param>
     /// <returns>IEnumerator</returns>
     private IEnumerator SplitImage(string filePath)
     {
-        //Debug.Log($"Splitting and saving image: {filePath}");
-
-        // Load an image as Texture2D, ‰æ‘œ‚ğTexture2D‚Æ‚µ‚Äƒ[ƒh
+        // ç”»åƒã‚’Texture2Dã¨ã—ã¦èª­ã¿è¾¼ã¿
         Texture2D originalTexture = LoadTexture(filePath);
         if (originalTexture == null)
         {
-            //Debug.LogError("Failed to load texture.");
             yield break;
         }
 
-        // Set image width and height, •ªŠ„‚·‚é•‚Æ‚‚³‚ğİ’è
+        // å·¦å³ç”»åƒã®å¹…ãƒ»é«˜ã•ã‚’è¨­å®š
         _originalWidth = originalTexture.width / 2;
         _originalHeight = originalTexture.height;
 
-        // Create left texture, ¶‘¤‚ÌƒeƒNƒXƒ`ƒƒ‚ğì¬
+        // å·¦ç”»åƒãƒ†ã‚¯ã‚¹ãƒãƒ£ç”Ÿæˆ
         Texture2D leftTexture = new Texture2D(_originalWidth, _originalHeight, originalTexture.format, false);
-        // Create right texture, ‰E‘¤‚ÌƒeƒNƒXƒ`ƒƒ‚ğì¬iƒŠƒjƒAƒJƒ‰[‹óŠÔ‚Æ‚µ‚Äˆµ‚¤j
-        Texture2D rightTexture = new Texture2D(originalTexture.width - _originalWidth, _originalHeight, originalTexture.format, false, true); // true for linear
+        // å³ç”»åƒãƒ†ã‚¯ã‚¹ãƒãƒ£ç”Ÿæˆï¼ˆæ·±åº¦æƒ…å ±ç”¨ï¼‰
+        Texture2D rightTexture = new Texture2D(originalTexture.width - _originalWidth, _originalHeight, originalTexture.format, false, true);
 
-        // Get pixel data, ƒsƒNƒZƒ‹ƒf[ƒ^‚ğæ“¾
+        // ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿å–å¾—
         Color32[] originalPixels = originalTexture.GetPixels32();
         Color32[] leftPixels = new Color32[_originalWidth * _originalHeight];
         Color32[] rightPixels = new Color32[(originalTexture.width - _originalWidth) * _originalHeight];
 
-        // Copy left image pixels, ¶‘¤‚ÌƒsƒNƒZƒ‹‚ğƒRƒs[
+        // å·¦ç”»åƒãƒ”ã‚¯ã‚»ãƒ«ã‚³ãƒ”ãƒ¼
         for (int y = 0; y < _originalHeight; y++)
         {
             for (int x = 0; x < _originalWidth; x++)
@@ -245,7 +131,7 @@ public class ImageSplitter : MonoBehaviour
             }
         }
 
-        // Copy right image pixels,‰E‘¤‚ÌƒsƒNƒZƒ‹‚ğƒRƒs[
+        // å³ç”»åƒãƒ”ã‚¯ã‚»ãƒ«ã‚³ãƒ”ãƒ¼
         for (int y = 0; y < _originalHeight; y++)
         {
             for (int x = _originalWidth; x < originalTexture.width; x++)
@@ -254,16 +140,15 @@ public class ImageSplitter : MonoBehaviour
             }
         }
 
-        // Calculate the depth information from the right half of the image and make it into a two-dimensional array and set it in the property.
-        // ‰E”¼•ª‚Ì‰æ‘œ‚©‚ç[“xî•ñ‚ğŒvZ‚µ‚QŸŒ³”z—ñ‚É‚µ‚ÄƒvƒƒpƒeƒB‚ÉƒZƒbƒg
-        float[] pixelZData = new float[rightPixels.GetLength(0)];
-
+        // å³ç”»åƒã‹ã‚‰æ·±åº¦æƒ…å ±ã‚’æŠ½å‡ºã—ä¸€æ¬¡å…ƒé…åˆ—ã«æ ¼ç´
+        float[] pixelZData = new float[rightPixels.Length];
         for (int i = 0; i < pixelZData.Length; i++)
         {
             pixelZData[i] = (rightPixels[i].a * 16777216f + rightPixels[i].b * 65536f + rightPixels[i].g * 256f + rightPixels[i].r) / 10000f;
         }
 
-        _pixelZMatrix = new float[(int)(pixelZData.Length / _originalWidth), (int)(pixelZData.Length / _originalHeight)];
+        // æ·±åº¦æƒ…å ±ã‚’äºŒæ¬¡å…ƒé…åˆ—ã«å¤‰æ›
+        _pixelZMatrix = new float[_originalHeight, _originalWidth];
         for (int j = 0; j < _originalHeight; j++)
         {
             for (int i = 0; i < _originalWidth; i++)
@@ -272,17 +157,17 @@ public class ImageSplitter : MonoBehaviour
             }
         }
 
-        // Set max depth, ƒvƒƒpƒeƒB‚ÉÅ[’l‚ğƒZƒbƒg
+        // æ·±åº¦ã®æœ€å¤§å€¤ã‚’è¨ˆç®—
         _pixelZMax = Mathf.Max(pixelZData);
 
-        // Set pixel data, ƒsƒNƒZƒ‹ƒf[ƒ^‚ğİ’è
+        // å·¦ç”»åƒã®ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿ã‚’ã‚»ãƒƒãƒˆ
         leftTexture.SetPixels32(leftPixels);
         leftTexture.Apply();
 
-        // Load the left image as a sprite and place it on Canvas, ¶‘¤‚Ì‰æ‘œ‚ğƒXƒvƒ‰ƒCƒg‚Æ‚µ‚Äƒ[ƒh‚µACanvas ‚É”z’u
+        // å·¦ç”»åƒã‚’SpriteåŒ–ã—ã¦Canvasã«é…ç½®
         StartCoroutine(LoadSpriteFromTexture(leftTexture));
 
-        // Release memory, ƒƒ‚ƒŠ‰ğ•ú
+        // ãƒ¡ãƒ¢ãƒªè§£æ”¾
         Destroy(originalTexture);
         Destroy(rightTexture);
 
@@ -290,107 +175,100 @@ public class ImageSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// w’è‚³‚ê‚½ƒeƒNƒXƒ`ƒƒ‚ğ UI ‚Ì Image ƒRƒ“ƒ|[ƒlƒ“ƒg‚Å•\¦‚µ‚Ü‚·B
-    /// ‘O‰ñ•\¦‚µ‚½‰æ‘œ‚ª‚ ‚ê‚Îíœ‚µ‚Ü‚·B
+    /// æŒ‡å®šã—ãŸTexture2Dã‚’UIã®Imageã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã¨ã—ã¦Canvasã«è¡¨ç¤ºã™ã‚‹
+    /// æ—¢å­˜ã®ç”»åƒãŒã‚ã‚Œã°å‰Šé™¤ã™ã‚‹
     /// </summary>
-    /// <param name="path">‰æ‘œƒtƒ@ƒCƒ‹‚ÌƒpƒX</param>
+    /// <param name="loadedTexture">è¡¨ç¤ºã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£</param>
     /// <returns>IEnumerator</returns>
     private IEnumerator LoadSpriteFromTexture(Texture2D loadedTexture)
     {
-        // Delete any previously displayed images, ‘O‰ñ•\¦‚µ‚½‰æ‘œ‚ª‚ ‚ê‚Îíœ
+        // æ—¢å­˜ã®ç”»åƒã‚’å‰Šé™¤
         if (previousImageObject != null)
         {
-            //Debug.Log("Destroying previous image.");
             Destroy(previousImageObject);
             previousImageObject = null;
         }
 
         if (loadedTexture)
         {
-            // Create Sprite, ƒXƒvƒ‰ƒCƒg‚ğì¬
+            // Spriteç”Ÿæˆ
             Sprite loadedSprite = Sprite.Create(loadedTexture, new Rect(0, 0, loadedTexture.width, loadedTexture.height),
                 new Vector2(0.5f, 0.5f));
 
-            // Create GameObject for left image on Canvas, Canvasã‚ÉImage—p‚ÌGameObject‚ğì¬
+            // Canvasä¸Šã«Imageç”¨GameObjectç”Ÿæˆ
             GameObject imageObject = new GameObject("LeftImageSprite");
-            imageObject.transform.SetParent(this.transform, false); // ImageSplitterManager ‚ğe‚Éİ’è
+            imageObject.transform.SetParent(this.transform, false);
 
-            // Add image component, ImageƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ’Ç‰Á
+            // Imageã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆè¿½åŠ 
             UnityEngine.UI.Image uiImage = imageObject.AddComponent<UnityEngine.UI.Image>();
             uiImage.sprite = loadedSprite;
 
-            // Get RectTransform of the image, Image‚ÌRectTransform‚ğæ“¾
+            // RectTransformè¨­å®š
             RectTransform rectTransform = imageObject.GetComponent<RectTransform>();
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
-            // Shift to the right by OFFSET, OFFSET ‚¾‚¯‰E‚É‚¸‚ç‚·
+            // å³æ–¹å‘ã«ã‚ªãƒ•ã‚»ãƒƒãƒˆ
             Vector2 offsetPosition = new Vector2(_offset, 0f);
             rectTransform.anchoredPosition = offsetPosition;
 
-            // Calculate Scaling factor, ƒXƒP[ƒŠƒ“ƒOŒW”‚ÌŒvZ
+            // ã‚¹ã‚±ãƒ¼ãƒ«è¨ˆç®—
             float scaleFactor = CalculateScaleFactor(_originalWidth, _originalHeight, TARGET_WIDTH, TARGET_HEIGHT);
             _scale = scaleFactor;
 
             Vector2 newSize = CalculateScaledSize(_originalWidth, _originalHeight, scaleFactor);
             rectTransform.sizeDelta = newSize;
 
-            // Set sortingOrder of CanvasRenderer of the image, Image‚ÌCanvasRenderer‚ÌsortingOrder‚ğİ’è
+            // CanvasRendererã®é€æ˜åº¦è¨­å®š
             CanvasRenderer canvasRenderer = imageObject.GetComponent<CanvasRenderer>();
-            canvasRenderer.SetAlpha(1f); // “§–¾“x‚ğİ’èi•K—v‚É‰‚¶‚Äj
+            canvasRenderer.SetAlpha(1f);
 
-            // Adjust the sort order in Canvas (order in Hierarchy determines display order), Canvas“à‚Ìƒ\[ƒg‡‚ğ’²®iHierarchy‚Å‚Ì‡˜‚ª•\¦‡‚ğŒˆ’èj
+            // Canvaså†…ã§ä¸€ç•ªæ‰‹å‰ã«è¡¨ç¤º
             imageObject.transform.SetAsLastSibling();
 
-            // Keep previous image as reference, ‘O‰ñ‚Ì‰æ‘œ‚ğQÆ‚Æ‚µ‚Ä•Û
+            // å‚ç…§ä¿æŒ
             previousImageObject = imageObject;
 
-            // Invoke event to notify other objects, ƒCƒxƒ“ƒg‚ğ”­‰Î‚µ‚Ä‘¼‚ÌƒIƒuƒWƒFƒNƒg‚É’Ê’m
+            // ã‚¤ãƒ™ãƒ³ãƒˆç™ºç«
             OnImageCreated?.Invoke(imageObject, loadedSprite);
-        }
-        else
-        {
-            //Debug.LogError("Failed to load image as Texture2D");
         }
 
         yield return null;
     }
 
     /// <summary>
-    /// Texture2D ‚ğƒ[ƒh‚µ‚Ü‚·B
+    /// æŒ‡å®šãƒ‘ã‚¹ã®ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã‚’Texture2Dã¨ã—ã¦èª­ã¿è¾¼ã‚€
     /// </summary>
-    /// <param name="filePath">‰æ‘œƒtƒ@ƒCƒ‹‚ÌƒpƒX</param>
-    /// <returns>ƒ[ƒh‚³‚ê‚½ Texture2D ƒIƒuƒWƒFƒNƒg</returns>
+    /// <param name="filePath">ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹</param>
+    /// <returns>èª­ã¿è¾¼ã‚“ã Texture2D</returns>
     private Texture2D LoadTexture(string filePath)
     {
         if (!File.Exists(filePath))
         {
-            //Debug.LogError($"File not found: {filePath}");
             return null;
         }
 
         byte[] fileData = File.ReadAllBytes(filePath);
-        Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, false); // false for linear by default
+        Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, false);
         if (tex.LoadImage(fileData))
         {
             return tex;
         }
         else
         {
-            //Debug.LogError("Failed to load image data into Texture2D.");
             return null;
         }
     }
 
     /// <summary>
-    /// ƒXƒP[ƒŠƒ“ƒOŒW”‚ğŒvZ‚µ‚Ü‚·iƒtƒB[ƒ‹ƒh‚ğXV‚µ‚Ü‚¹‚ñjB
+    /// æŒ‡å®šã—ãŸæœ€å¤§ã‚µã‚¤ã‚ºã«åã¾ã‚‹ã‚ˆã†ãªã‚¹ã‚±ãƒ¼ãƒ«ä¿‚æ•°ã‚’è¨ˆç®—ã™ã‚‹
     /// </summary>
-    /// <param name="originalWidth">Œ³‚Ì‰æ‘œ‚Ì•</param>
-    /// <param name="originalHeight">Œ³‚Ì‰æ‘œ‚Ì‚‚³</param>
-    /// <param name="maxWidth">Å‘å•</param>
-    /// <param name="maxHeight">Å‘å‚‚³</param>
-    /// <returns>ƒXƒP[ƒŠƒ“ƒOŒW”</returns>
+    /// <param name="originalWidth">å…ƒç”»åƒã®å¹…</param>
+    /// <param name="originalHeight">å…ƒç”»åƒã®é«˜ã•</param>
+    /// <param name="maxWidth">æœ€å¤§å¹…</param>
+    /// <param name="maxHeight">æœ€å¤§é«˜ã•</param>
+    /// <returns>ã‚¹ã‚±ãƒ¼ãƒ«ä¿‚æ•°</returns>
     private float CalculateScaleFactor(int originalWidth, int originalHeight, float maxWidth, float maxHeight)
     {
         float widthRatio = maxWidth / originalWidth;
@@ -400,14 +278,12 @@ public class ImageSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// w’è‚³‚ê‚½˜g‚Éû‚Ü‚é‚æ‚¤‚Éc‰¡”ä‚ğˆÛ‚µ‚½V‚µ‚¢ƒTƒCƒY‚ğŒvZ‚µ‚Ü‚·B
+    /// æŒ‡å®šã—ãŸã‚¹ã‚±ãƒ¼ãƒ«ä¿‚æ•°ã§æ‹¡å¤§ç¸®å°ã—ãŸå ´åˆã®æ–°ã—ã„ã‚µã‚¤ã‚ºã‚’è¨ˆç®—ã™ã‚‹
     /// </summary>
-    /// <param name="originalWidth">Œ³‚Ì‰æ‘œ‚Ì•</param>
-    /// <param name="originalHeight">Œ³‚Ì‰æ‘œ‚Ì‚‚³</param>
-    /// <param name="maxWidth">Å‘å•</param>
-    /// <param name="maxHeight">Å‘å‚‚³</param>
-    /// <param name="scaleFactor">ƒXƒP[ƒŠƒ“ƒOŒW”</param>
-    /// <returns>V‚µ‚¢ƒTƒCƒY (•, ‚‚³)</returns>
+    /// <param name="originalWidth">å…ƒç”»åƒã®å¹…</param>
+    /// <param name="originalHeight">å…ƒç”»åƒã®é«˜ã•</param>
+    /// <param name="scaleFactor">ã‚¹ã‚±ãƒ¼ãƒ«ä¿‚æ•°</param>
+    /// <returns>æ–°ã—ã„ã‚µã‚¤ã‚º (å¹…, é«˜ã•)</returns>
     private Vector2 CalculateScaledSize(int originalWidth, int originalHeight, float scaleFactor)
     {
         float newWidth = originalWidth * scaleFactor;

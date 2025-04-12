@@ -4,76 +4,61 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// ã‚«ã‚¹ã‚¿ãƒ ã‚°ãƒªãƒƒãƒ‰ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆãƒ»æ“ä½œã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+/// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
-public class MeshGenerator : MonoBehaviour
+public class CustomGridMesh : MonoBehaviour
 {
-    // Set object width in m, ƒIƒuƒWƒFƒNƒg‚Ì‰¡‚Ì’·‚³iƒ[ƒgƒ‹j‚ğİ’è
-    public float objectSize = 5f; // 5m
+    // --- Inspectorã§è¨­å®šå¯èƒ½ãªãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ ---
+    [Tooltip("ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å¹…ï¼ˆãƒ¡ãƒ¼ãƒˆãƒ«å˜ä½ï¼‰")]
+    public float objectSize = 5f;
 
-    // Set reference to ImageManipulator script from inspector, ImageManipulatorƒXƒNƒŠƒvƒg‚Ö‚ÌQÆ‚ğƒCƒ“ƒXƒyƒNƒ^[‚©‚çİ’è
-    [SerializeField]
-    private ImageManipulator imageManipulator;
+    [SerializeField] private ImageManipulator imageManipulator;
+    [SerializeField] private ImageCropper imageCropper;
 
-    // Set ImageSplitter, ImageSplitterƒXƒNƒŠƒvƒg‚Ö‚ÌQÆ‚ğƒCƒ“ƒXƒyƒNƒ^[‚©‚çİ’è
-    [SerializeField]
-    private ImageCropper imageCropper;
+    [SerializeField] public GameObject sliderMR;
+    [SerializeField] public GameObject sliderCropD;
+    [SerializeField] public GameObject sliderCompN;
+    [SerializeField] public GameObject sliderCompF;
+    [SerializeField] public GameObject sliderCompD;
+    [SerializeField] public GameObject valueMR;
+    [SerializeField] public GameObject valueCropD;
+    [SerializeField] public GameObject valueCompN;
+    [SerializeField] public GameObject valueCompF;
+    [SerializeField] public GameObject valueCompD;
 
-    // sliderŠÖŒW
-    [SerializeField]
-    public GameObject sliderMR;
-    [SerializeField]
-    public GameObject sliderCropD;
-    [SerializeField]
-    public GameObject sliderCompN;
-    [SerializeField]
-    public GameObject sliderCompF;
-    [SerializeField]
-    public GameObject sliderCompD;
-    [SerializeField]
-    public GameObject valueMR;
-    [SerializeField]
-    public GameObject valueCropD;
-    [SerializeField]
-    public GameObject valueCompN;
-    [SerializeField]
-    public GameObject valueCompF;
-    [SerializeField]
-    public GameObject valueCompD;
-
-    private Mesh mesh;             // keep reference to mesh, ƒƒbƒVƒ…‚Ö‚ÌQÆ‚ğ•Û
-    private Vector3[] vertices;    // keep vrtices, ’¸“_”z—ñ‚ğ•Û
+    // --- å†…éƒ¨çŠ¶æ…‹ ---
+    private Mesh mesh;
+    private Vector3[] vertices;
     public int counter = 0;
 
-    Slider sliderMagnificationRatio;
-    [Range(1f, 50f)]
-    public float magnificationRatio = 1f;
-    Slider sliderCropDistance;
-    [Range(1f, 99.9f)]
-    public float cropDistance = 50f;
-    Slider sliderCompressNearest;
-    [Range(0.0f,10f)]
-    public float compressNearest = 0.1f;
-    Slider sliderCompressFarthest;
-    [Range(1.0f, 99.9f)]
-    public float compressFarthest = 2.0f;
-    Slider sliderCompressDistance;
-    [Range(0.1f, 99.9f)]
-    public float compressDistance = 1.9f;
+    private Slider sliderMagnificationRatio;
+    [Range(1f, 50f)] public float magnificationRatio = 1f;
+    private Slider sliderCropDistance;
+    [Range(1f, 99.9f)] public float cropDistance = 50f;
+    private Slider sliderCompressNearest;
+    [Range(0.0f, 10f)] public float compressNearest = 0.1f;
+    private Slider sliderCompressFarthest;
+    [Range(1.0f, 99.9f)] public float compressFarthest = 2.0f;
+    private Slider sliderCompressDistance;
+    [Range(0.1f, 99.9f)] public float compressDistance = 1.9f;
 
-    TextMeshProUGUI vMR;
-    TextMeshProUGUI vCropD;
-    TextMeshProUGUI vCompN;
-    TextMeshProUGUI vCompF;
-    TextMeshProUGUI vCompD;
+    private TextMeshProUGUI vMR;
+    private TextMeshProUGUI vCropD;
+    private TextMeshProUGUI vCompN;
+    private TextMeshProUGUI vCompF;
+    private TextMeshProUGUI vCompD;
 
     private float[] zValues;
     private float zValueMin;
     private bool isMeshCreated = false;
 
-    // Mesh Creation, mesh‚ğì¬
+    /// <summary>
+    /// ç”»åƒã‚¯ãƒ­ãƒƒãƒ—æ™‚ã®ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
+    /// </summary>
     public void OnImageCroppedHandler(int frameWidth, int frameHeight, bool isStart)
-
     {
         if (isStart)
         {
@@ -81,12 +66,12 @@ public class MeshGenerator : MonoBehaviour
             isMeshCreated = true;
         }
         zValues = imageCropper.zValues;
-        float _zValueMin = zValues.Min();
-        zValueMin = _zValueMin;
-
+        zValueMin = zValues.Min();
     }
 
-    // Slider Settings, slider‚Ìİ’è
+    /// <summary>
+    /// ã‚¹ãƒ©ã‚¤ãƒ€ãƒ¼ãƒ»UIåˆæœŸåŒ–
+    /// </summary>
     private void Awake()
     {
         sliderMagnificationRatio = sliderMR.GetComponent<Slider>();
@@ -102,7 +87,9 @@ public class MeshGenerator : MonoBehaviour
         vCompD = valueCompD.GetComponent<TextMeshProUGUI>();
     }
 
-    // Slider Adjustments, slider‚Ì’²®
+    /// <summary>
+    /// ã‚¹ãƒ©ã‚¤ãƒ€ãƒ¼åˆæœŸå€¤è¨­å®š
+    /// </summary>
     private void Start()
     {
         magnificationRatio = 1.0f;
@@ -121,10 +108,12 @@ public class MeshGenerator : MonoBehaviour
         vCropD.text = sliderCropDistance.value.ToString("f1");
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
-        vCompD.text = sliderCompressDistance.value.ToString("f1");        
+        vCompD.text = sliderCompressDistance.value.ToString("f1");
     }
 
-    // Set Slider Values, slider‚Ì’l‚ª•Ï‚í‚Á‚½‚É’l‚Ì‘å¬‚ğ’²®‚Ìã‚Å•\¦
+    /// <summary>
+    /// ã‚¹ãƒ©ã‚¤ãƒ€ãƒ¼å€¤å¤‰æ›´æ™‚ã®å‡¦ç†
+    /// </summary>
     public void SliderValueChanged()
     {
         float _compressNearest = sliderCompressNearest.value;
@@ -140,27 +129,26 @@ public class MeshGenerator : MonoBehaviour
         vCompN.text = sliderCompressNearest.value.ToString("f1");
         vCompF.text = sliderCompressFarthest.value.ToString("f1");
         vCompD.text = sliderCompressDistance.value.ToString("f1");
-
     }
+
     private void Update()
     {
         if (!isMeshCreated)
             return;
-        
-        // Update z coordinates, ZÀ•W‚ğXV
+
+        // Zåº§æ¨™ã®æ›´æ–°
         UpdateVertexZPositions(i =>
         {
-            float zValue;
             magnificationRatio = sliderMagnificationRatio.value;
             cropDistance = sliderCropDistance.value;
             compressNearest = sliderCompressNearest.value;
             compressFarthest = sliderCompressFarthest.value;
             compressDistance = sliderCompressDistance.value;
 
-            zValue = Mathf.Min((zValues[i] - zValueMin) * imageManipulator.displayedScale, cropDistance);
+            float zValue = Mathf.Min((zValues[i] - zValueMin) * imageManipulator.displayedScale, cropDistance);
             zValue = Mathf.Log(1 + zValue) * Mathf.Pow(magnificationRatio, 1.0f);
 
-            // Adjustment of image depth, ‰æ‘œ‚Ì‹——£Š´‚Ì’²®—p
+            // æ·±åº¦åœ§ç¸®èª¿æ•´
             if (compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
             if (compressDistance > (compressFarthest - compressNearest)) { compressDistance = compressFarthest - compressNearest - 0.1f; }
             if (zValue > compressNearest && zValue < compressFarthest)
@@ -173,35 +161,29 @@ public class MeshGenerator : MonoBehaviour
             }
 
             return zValue;
-        //      float x = vertices[i].x;
-        //      float y = vertices[i].y;
-        //      return Mathf.Sin(Time.time + x + y) * 0.5f; // Sine wave, U•0.5‚ÌƒTƒCƒ“”g
         });
     }
 
-    // Update Vertex Z Position, ’¸“_‚ÌZÀ•W‚ğ•ÏX‚·‚éƒƒ\ƒbƒh
-    public void UpdateVertexZPositions(System.Func<int, float> zPositionFunc)
+    /// <summary>
+    /// å„é ‚ç‚¹ã®Zåº§æ¨™ã‚’æ›´æ–°
+    /// </summary>
+    public void UpdateVertexZPositions(Func<int, float> zPositionFunc)
     {
-         // Update each vertices, Še’¸“_‚ÌZÀ•W‚ğXV
         for (int i = 0; i < vertices.Length; i++)
         {
             vertices[i].z = zPositionFunc(i);
         }
-
-        // Set vertices to mesh, ƒƒbƒVƒ…‚É’¸“_”z—ñ‚ğÄİ’è
         mesh.vertices = vertices;
-
-        // Recalculate normals and bounding volumes, •K—v‚É‰‚¶‚Ä–@ü‚ÆƒoƒEƒ“ƒfƒBƒ“ƒOƒ{ƒŠƒ…[ƒ€‚ğÄŒvZ
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
     }
 
+    /// <summary>
+    /// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
+    /// </summary>
     public void CreateMesh(int meshWidth, int meshHeight)
     {
-
-        ////Start to create Mesh, Mesh ‚Ìì¬ŠJn
         mesh = new Mesh();
-        // Using UInt32 index, ’¸“_”‚ª65535‚ğ’´‚¦‚éê‡‚Í32ƒrƒbƒgƒCƒ“ƒfƒbƒNƒX‚ğg—p
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
         int verticesPerRow = meshWidth + 1;
@@ -216,18 +198,18 @@ public class MeshGenerator : MonoBehaviour
         Vector2[] uvs = new Vector2[numVertices];
         int[] triangles = new int[numIndices];
 
-        // Create vertices and UV in XY plane, ’¸“_‚ÆUV‚Ì¶¬iXY•½–Êã‚É”z’uj
+        // é ‚ç‚¹ãƒ»UVç”Ÿæˆ
         for (int y = 0; y < verticesPerColumn; y++)
         {
             for (int x = 0; x < verticesPerRow; x++)
             {
                 int index = y * verticesPerRow + x;
-                vertices[index] = new Vector3(x * cellSize, y * cellSize, 0); // Z‚ğ0‚Éİ’è
+                vertices[index] = new Vector3(x * cellSize, y * cellSize, 0);
                 uvs[index] = new Vector2((float)x / meshWidth, (float)y / meshHeight);
             }
         }
 
-        // Create triangles, OŠpŒ`‚Ì¶¬
+        // ä¸‰è§’å½¢ç”Ÿæˆ
         int triangleIndex = 0;
         for (int y = 0; y < meshHeight; y++)
         {
@@ -238,31 +220,24 @@ public class MeshGenerator : MonoBehaviour
                 int topLeft = bottomLeft + verticesPerRow;
                 int topRight = topLeft + 1;
 
-                // First Triangle, 1‚Â–Ú‚ÌOŠpŒ`
                 triangles[triangleIndex++] = bottomLeft;
                 triangles[triangleIndex++] = topLeft;
                 triangles[triangleIndex++] = topRight;
 
-                // Second Triangle, 2‚Â–Ú‚ÌOŠpŒ`
                 triangles[triangleIndex++] = bottomLeft;
                 triangles[triangleIndex++] = topRight;
                 triangles[triangleIndex++] = bottomRight;
             }
         }
 
-        // Apply data to mesh, ƒƒbƒVƒ…‚Éƒf[ƒ^‚ğ“K—p
+        // ãƒ¡ãƒƒã‚·ãƒ¥ã«ãƒ‡ãƒ¼ã‚¿é©ç”¨
         mesh.vertices = vertices;
         mesh.uv = uvs;
         mesh.triangles = triangles;
-
-        // Recalculate normals, –@ü‚ÌÄŒvZ
         mesh.RecalculateNormals();
 
-        // Set mesh to MeshFilter, MeshFilter‚ÉƒƒbƒVƒ…‚ğİ’è
+        // MeshFilterã«ã‚»ãƒƒãƒˆ
         MeshFilter mf = GetComponent<MeshFilter>();
         mf.mesh = mesh;
-
-        //// Finish, Mesh ‚Ìì¬I—¹
-        //Debug.Log("vertices.Length; " + vertices.Length);
     }
 }

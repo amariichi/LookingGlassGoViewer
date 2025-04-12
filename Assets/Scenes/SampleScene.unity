@@ -8053,12 +8053,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _offset: 90
-  _originalWidth: 0
-  _originalHeight: 0
-  _scale: 1
-  dropdownItem: {fileID: 1047706724}
   _meshX: 0
   _meshY: 0
+  dropdownItem: {fileID: 1047706724}
   OnImageCreated:
     m_PersistentCalls:
       m_Calls:
@@ -8086,6 +8083,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
+  _originalWidth: 0
+  _originalHeight: 0
+  _scale: 1
 --- !u!114 &1875398557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8122,11 +8122,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   imageSplitter: {fileID: 1875398556}
   imageManipulator: {fileID: 1875398557}
-  lastDisplayedPositionX: 0
-  finalLeftImage: {fileID: 0}
+  materialL: {fileID: 2100000, guid: 6c687bea1a58e8449a7f814b22a37b10, type: 2}
   meshWidth: 0
   meshHeight: 0
-  materialL: {fileID: 2100000, guid: 6c687bea1a58e8449a7f814b22a37b10, type: 2}
   OnImageCropped:
     m_PersistentCalls:
       m_Calls:
