@@ -160,10 +160,6 @@ public class ImageCropper : MonoBehaviour
         Vector2 frameLT = new Vector2(-frameWidth / 2f, frameHeight / 2f);
         Vector2 frameRB = new Vector2(frameWidth / 2f, -frameHeight / 2f);
 
-        // 外枠（物理的な制約）の左上・右下
-        Vector2 outerFrameLT = new Vector2(-189f / initialScale, 336f / initialScale);
-        Vector2 outerFrameRB = new Vector2(189f / initialScale, -336f / initialScale);
-
         // 画像の左上・右下（表示位置・スケール反映）
         Vector2 imageLT = new Vector2(
             -originalWidth / 2f * lastDisplayedScale + lastDisplayedPositionX / initialScale,
@@ -174,10 +170,6 @@ public class ImageCropper : MonoBehaviour
             -originalHeight / 2f * lastDisplayedScale + lastDisplayedPositionY / initialScale
         );
 
-        // クロップ範囲初期化
-        Vector2 cropFrameLT = Vector2.zero, cropFrameRB = Vector2.zero;
-        Vector2 cropLT = Vector2.zero, cropRB = Vector2.zero;
-
         // 透明で初期化した新規テクスチャ
         Texture2D newTexture = new Texture2D(frameWidth, frameHeight, TextureFormat.RGBA32, false);
         Color[] fillPixels = new Color[frameWidth * frameHeight];
@@ -185,80 +177,80 @@ public class ImageCropper : MonoBehaviour
         newTexture.SetPixels(fillPixels);
 
         // 画像がフレーム内に存在する場合のみ処理
+        int pasteW = 0, pasteH = 0, srcX = 0, srcY = 0;
         if (imageRB.y < frameLT.y && imageRB.x > frameLT.x && imageLT.x < frameRB.x && imageLT.y > frameRB.y)
         {
-            // 外枠と画像の重なり範囲を計算
-            cropFrameLT.x = Mathf.Max(imageLT.x, outerFrameLT.x);
-            cropFrameRB.x = Mathf.Min(imageRB.x, outerFrameRB.x);
-            cropFrameLT.y = Mathf.Min(imageLT.y, outerFrameLT.y);
-            cropFrameRB.y = Mathf.Max(imageRB.y, outerFrameRB.y);
+            // フレームと画像の重なり範囲を計算
+            Vector2 cropLT = new Vector2(
+                Mathf.Max(imageLT.x, frameLT.x),
+                Mathf.Min(imageLT.y, frameLT.y)
+            );
+            Vector2 cropRB = new Vector2(
+                Mathf.Min(imageRB.x, frameRB.x),
+                Mathf.Max(imageRB.y, frameRB.y)
+            );
 
             // 元画像からクロップする範囲（左下基準）
-            int cropOuterLBX = Mathf.RoundToInt((cropFrameLT.x - imageLT.x) / lastDisplayedScale);
-            int cropOuterLBY = Mathf.RoundToInt((cropFrameRB.y - imageRB.y) / lastDisplayedScale);
-            int cropOuterW = Mathf.RoundToInt((cropFrameRB.x - cropFrameLT.x) / lastDisplayedScale);
-            int cropOuterH = Mathf.RoundToInt((cropFrameLT.y - cropFrameRB.y) / lastDisplayedScale);
+            int cropLBX = Mathf.RoundToInt((cropLT.x - imageLT.x) / lastDisplayedScale);
+            int cropLBY = Mathf.RoundToInt((cropRB.y - imageRB.y) / lastDisplayedScale);
+            int cropW = Mathf.RoundToInt((cropRB.x - cropLT.x) / lastDisplayedScale);
+            int cropH = Mathf.RoundToInt((cropLT.y - cropRB.y) / lastDisplayedScale);
 
-            Vector2 outerLT = cropFrameLT;
-            Vector2 outerRB = cropFrameRB;
+            Color[] croppedPixels = originalTexture.GetPixels(cropLBX, cropLBY, cropW, cropH);
 
-            // 範囲外アクセス防止
-            cropOuterLBX = Mathf.Clamp(cropOuterLBX, 0, originalTexture.width - 1);
-            cropOuterLBY = Mathf.Clamp(cropOuterLBY, 0, originalTexture.height - 1);
-            cropOuterW = Mathf.Clamp(cropOuterW, 1, originalTexture.width - cropOuterLBX);
-            cropOuterH = Mathf.Clamp(cropOuterH, 1, originalTexture.height - cropOuterLBY);
+            // 一時テクスチャを作成しスケーリング
+            Texture2D croppedTex = new Texture2D(cropW, cropH, TextureFormat.RGBA32, false);
+            croppedTex.SetPixels(0, 0, cropW, cropH, croppedPixels);
+            croppedTex.Apply();
 
-            // 元画像から外枠部分をクロップ
-            Color[] croppedOuterPixels = originalTexture.GetPixels(cropOuterLBX, cropOuterLBY, cropOuterW, cropOuterH);
-            Texture2D outerFrameCroppedTexture = new Texture2D(cropOuterW, cropOuterH, TextureFormat.RGBA32, false);
-            outerFrameCroppedTexture.SetPixels(0, 0, cropOuterW, cropOuterH, croppedOuterPixels);
-            outerFrameCroppedTexture.Apply();
-
-            // スケール適用
-            scaledTexture = ScaleTexture(outerFrameCroppedTexture, lastDisplayedScale);
-
-            // フレームと外枠の重なり範囲
-            cropLT.x = Mathf.Max(outerLT.x, frameLT.x);
-            cropRB.x = Mathf.Min(outerRB.x, frameRB.x);
-            cropLT.y = Mathf.Min(outerLT.y, frameLT.y);
-            cropRB.y = Mathf.Max(outerRB.y, frameRB.y);
-
-            int cropLBX = Mathf.RoundToInt(cropLT.x - outerLT.x);
-            int cropLBY = Mathf.RoundToInt(cropRB.y - outerRB.y);
-            int cropW = Mathf.RoundToInt(cropRB.x - cropLT.x);
-            int cropH = Mathf.RoundToInt(cropLT.y - cropRB.y);
-
-            // 範囲外アクセス防止
-            cropLBX = Mathf.Clamp(cropLBX, 0, scaledTexture.width - 1);
-            cropLBY = Mathf.Clamp(cropLBY, 0, scaledTexture.height - 1);
-            cropW = Mathf.Clamp(cropW, 1, scaledTexture.width - cropLBX);
-            cropH = Mathf.Clamp(cropH, 1, scaledTexture.height - cropLBY);
-
-            Color[] croppedPixels = scaledTexture.GetPixels(cropLBX, cropLBY, cropW, cropH);
+            // lastDisplayedScaleでリサイズ
+            int scaledW = Mathf.Max(1, Mathf.RoundToInt(cropW * lastDisplayedScale));
+            int scaledH = Mathf.Max(1, Mathf.RoundToInt(cropH * lastDisplayedScale));
+            Texture2D scaledTex = ScaleTexture(croppedTex, lastDisplayedScale);
 
             // 貼り付け位置（フレーム内座標系→テクスチャ座標系）
             int pasteX = Mathf.RoundToInt(cropLT.x + frameWidth / 2f);
             int pasteY = Mathf.RoundToInt(cropRB.y + frameHeight / 2f);
 
-            // フレーム外にはみ出さないよう調整
-            cropW = Mathf.Min(cropW, frameWidth - pasteX);
-            cropH = Mathf.Min(cropH, frameHeight - pasteY);
+            // フレーム外にはみ出さないよう厳密に調整
+            pasteW = scaledTex.width;
+            pasteH = scaledTex.height;
+            srcX = 0; srcY = 0;
+            if (pasteX < 0) { srcX = -pasteX; pasteW += pasteX; pasteX = 0; }
+            if (pasteY < 0) { srcY = -pasteY; pasteH += pasteY; pasteY = 0; }
+            if (pasteX + pasteW > frameWidth) { pasteW = frameWidth - pasteX; }
+            if (pasteY + pasteH > frameHeight) { pasteH = frameHeight - pasteY; }
 
-            if (cropW > 0 && cropH > 0)
+            if (pasteW > 0 && pasteH > 0)
             {
-                newTexture.SetPixels(pasteX, pasteY, cropW, cropH, croppedPixels);
+                Color[] scaledPixels = scaledTex.GetPixels(srcX, srcY, pasteW, pasteH);
+                newTexture.SetPixels(pasteX, pasteY, pasteW, pasteH, scaledPixels);
             }
 
             // 内部状態保存
-            _cropPositionX = cropLBX + Mathf.RoundToInt(outerLT.x - imageLT.x);
-            _cropPositionY = cropLBY + Mathf.RoundToInt(outerRB.y - imageRB.y);
-            _cropWidth = cropW;
-            _cropHeight = cropH;
+            _cropPositionX = cropLBX;
+            _cropPositionY = cropLBY;
+            _cropWidth = pasteW;
+            _cropHeight = pasteH;
             _pasteX = pasteX;
             _pasteY = pasteY;
 
-            Destroy(outerFrameCroppedTexture);
+            UnityEngine.Object.Destroy(croppedTex);
+            UnityEngine.Object.Destroy(scaledTex);
         }
+
+        // 端の行・列を必ず透明で上書き
+        for (int x = 0; x < frameWidth; x++)
+        {
+            newTexture.SetPixel(x, 0, new Color(0f, 0f, 0f, 0f));
+            newTexture.SetPixel(x, frameHeight - 1, new Color(0f, 0f, 0f, 0f));
+        }
+        for (int y = 0; y < frameHeight; y++)
+        {
+            newTexture.SetPixel(0, y, new Color(0f, 0f, 0f, 0f));
+            newTexture.SetPixel(frameWidth - 1, y, new Color(0f, 0f, 0f, 0f));
+        }
+        
         newTexture.Apply();
         return newTexture;
     }
@@ -313,22 +305,32 @@ public class ImageCropper : MonoBehaviour
 
         float meshScale = (float)meshWidth / frameWidth;
 
+        // スケーリング後の貼り付け範囲
+        int pasteX = _pasteX;
+        int pasteY = _pasteY;
+        int pasteW = _cropWidth;
+        int pasteH = _cropHeight;
+        float scale = lastDisplayedScale;
+
         for (int j = 0; j <= meshHeight; j++)
         {
             for (int i = 0; i <= meshWidth; i++)
             {
-                // クロップ範囲内か判定
+                // スケーリング後の貼り付け範囲内か判定
                 bool inCrop =
-                    i >= _pasteX * meshScale && i <= (_pasteX + _cropWidth) * meshScale &&
-                    j >= _pasteY * meshScale && j <= (_pasteY + _cropHeight) * meshScale;
+                    i >= pasteX * meshScale && i <= (pasteX + pasteW) * meshScale &&
+                    j >= pasteY * meshScale && j <= (pasteY + pasteH) * meshScale;
 
                 if (inCrop)
                 {
+                    // mesh座標→スケーリング後テクスチャ座標→スケーリング前元画像座標
+                    float texX = (i / meshScale) - pasteX; // スケーリング後テクスチャ内のX
+                    float texY = (j / meshScale) - pasteY; // スケーリング後テクスチャ内のY
                     int matrixColumn = Mathf.Clamp(
-                        (int)((Mathf.Min(i - _pasteX * meshScale, meshWidth - 1) / meshScale + _cropPositionX) / lastDisplayedScale),
+                        _cropPositionX + Mathf.RoundToInt(texX / scale),
                         0, originalWidth - 1);
                     int matrixRow = Mathf.Clamp(
-                        (int)((Mathf.Min(j - _pasteY * meshScale, meshHeight - 1) / meshScale + _cropPositionY) / lastDisplayedScale),
+                        _cropPositionY + Mathf.RoundToInt(texY / scale),
                         0, originalHeight - 1);
 
                     int idx = (meshWidth + 1) * j + i;

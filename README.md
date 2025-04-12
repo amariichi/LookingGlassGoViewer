@@ -9,9 +9,9 @@ Looking Glass Go では、遠くにあるものは大きくぼやけてしまい
 
 python スクリプトの実行には、別途 Depth Pro [[URL](https://github.com/apple/ml-depth-pro)] のインストールが必要です。
 
-**V1.1.7:** openrouter/optimus-alpha を使ってコードの書き方をきれいにしてもらいました。機能や動作は変更ありません。
+**V1.1.8:** openrouter/optimus-alpha を使って `ImageCropper.cs` のテクスチャのスケーリングと切り出しのロジックをシンプルにしました。また、テクスチャの「端のゴミ」の軽減を図りました。
 
-### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.7)
+### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.8)
 
 ### 設定方法及び使用方法の概要
 1. Depth Pro を公式ページに記載の方法でインストール。
@@ -73,9 +73,9 @@ The output Quilt image can be loaded into Looking Glass Studio.
 
 To run the Python script, you need to install Depth Pro separately. [[URL](https://github.com/apple/ml-depth-pro)]
 
-**V1.1.7:** I used openrouter/optimus-alpha to clean up the code. There are no changes to its functionality or behavior.
+**V1.1.8:** I simplified the texture scaling and cropping logic in `ImageCropper.cs` using openrouter/optimus-alpha. Additionally, I made improvements to reduce visual artifacts ("edge noise") on the texture boundaries.
 
-### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.7)
+### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.8)
 
 ### Summary of Setup and Usage
 1. Install Depth Pro according to the method described on the official page.
