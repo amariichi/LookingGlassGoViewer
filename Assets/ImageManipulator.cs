@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -42,6 +43,8 @@ public class ImageManipulator : MonoBehaviour, IPointerDownHandler, IDragHandler
     public int displayedPositionX => _displayedPositionX;
     public int displayedPositionY => _displayedPositionY;
     public float displayedScale => _displayedScale;
+
+    public event Action OnDisplayParametersChanged;
 
     /// <summary>
     /// 画像生成時の初期化ハンドラ
@@ -106,9 +109,22 @@ public class ImageManipulator : MonoBehaviour, IPointerDownHandler, IDragHandler
         }
 
         // 表示パラメータを更新
-        _displayedPositionX = (int)(rectTransform.localPosition.x - offset);
-        _displayedPositionY = (int)rectTransform.localPosition.y;
-        _displayedScale = rectTransform.localScale.x;
+        int newDisplayedPositionX = (int)(rectTransform.localPosition.x - offset);
+        int newDisplayedPositionY = (int)rectTransform.localPosition.y;
+        float newDisplayedScale = rectTransform.localScale.x;
+
+        bool hasChanged = newDisplayedPositionX != _displayedPositionX
+            || newDisplayedPositionY != _displayedPositionY
+            || !Mathf.Approximately(newDisplayedScale, _displayedScale);
+
+        _displayedPositionX = newDisplayedPositionX;
+        _displayedPositionY = newDisplayedPositionY;
+        _displayedScale = newDisplayedScale;
+
+        if (hasChanged)
+        {
+            OnDisplayParametersChanged?.Invoke();
+        }
     }
 
     /// <summary>

@@ -1,6 +1,12 @@
 ## Looking Glass Go Viewer App for windows
 
-![app](https://github.com/user-attachments/assets/3d6f9620-8a40-4f43-b5a4-c683f2a371ed) ![app2](https://github.com/user-attachments/assets/211f5bd9-b899-4d91-937b-9387a54fca49)
+![app](https://github.com/user-attachments/assets/3d6f9620-8a40-4f43-b5a4-c683f2a371ed) ![app2](https://github.com/user-attachments/assets/211f5bd9-b899-4d91-937b-9387a54fca49) ![app3](https://github.com/user-attachments/assets/64281a90-5e02-4a80-b884-040e40c8ee81) ![app4](https://github.com/user-attachments/assets/21ae5c49-57e0-4011-b893-52d81e15cd04)
+
+Language / 言語: [English](#english) | [日本語](#日本語)
+
+---
+
+## 日本語
 
 ### 概要
 付属の Python スクリプトを使用して、Apple が公開した Depth Pro で推定したデプス情報を追加したPNG画像データを作成します。そのPNG画像を読み込み、画像を拡大したり、Looking Glass Go での見え方を調整するツールです。
@@ -9,9 +15,8 @@ Looking Glass Go では、遠くにあるものは大きくぼやけてしまい
 
 python スクリプトの実行には、別途 Depth Pro [[URL](https://github.com/apple/ml-depth-pro)] のインストールが必要です。
 
-**V1.1.8:** openrouter/optimus-alpha を使って `ImageCropper.cs` のテクスチャのスケーリングと切り出しのロジックをシンプルにしました。また、テクスチャの「端のゴミ」の軽減を図りました。
-
-### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.8)
+**V1.2:** カーソルキーでモデルを上下左右30度まで回転できるようになりました。また、モデルの奥行きの計算方法をリニアに変更しました。
+### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.2)
 
 ### 設定方法及び使用方法の概要
 1. Depth Pro を公式ページに記載の方法でインストール。
@@ -32,16 +37,15 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 - マウスの左ドラッグで移動、ホイールでズーム、右クリックで初期状態になります。
 - 各スライダーの関係は下の図のとおりです。なお、2つの "Camera Position" スライダーは Looking Glass Go 上の合焦する奥行きの調整に使用します。
 
-![fig1](https://github.com/user-attachments/assets/4e8e1507-1e02-4fd2-b5b6-7451270beeb6)
+![fig1](https://github.com/user-attachments/assets/8b551571-4ab0-49a0-98b9-ee6a457dfe6f)
 
-- **F1 キー**を押すと `Recordings` フォルダに Quilt 画像が保存されます。Quilt 画像は LookingGlassStudio で読み込むことができます。~~なお、画像にメタデータは入っていないので、手動で横11 x 縦６を指定します。~~
+- **F1 キー**を押すと `Recordings` フォルダに Quilt 画像が保存されます。Quilt 画像は LookingGlassStudio で読み込むことができます。
 - **QUIT** ボタンでアプリを終了します。
 
 ### Unity Editor への読み込み及び利用
 - ソースファイルの内容を任意のフォルダに入れ、Unity Hub の Add project from disk で当該フォルダを指定してプロジェクトを追加します。
 - 外部パッケージが含まれていないので途中でコンパイルエラーが出ますが、`Ignore` を選択します。
-- Unity Editor が自動的に追加したカメラとライトを削除します。
-- Looking Glass Unity Plugin パッケージ [[URL](https://lookingglassfactory.com/software/looking-glass-unity-plugin)] と UnityStandaloneFileBrowser の Unity パッケージ [[URL](https://github.com/gkngkc/UnityStandaloneFileBrowser)] をダウンロードし、プロジェクトに追加（`import package -> custom package`）します。これでエラーは解消されます。
+- Looking Glass Unity Plugin パッケージ [[URL](https://lookingglassfactory.com/software/looking-glass-unity-plugin)] と UnityStandaloneFileBrowser の Unity パッケージ [[URL](https://github.com/gkngkc/UnityStandaloneFileBrowser)] をダウンロードし、プロジェクトに追加（`import package -> custom package`）します。なお、Looking Glass Unity Plugin を import する際に、Examples フォルダのチェックを外してください（コンパイルエラーが出ます）。これでエラーは解消されます。
 - `Assets > Scenes` にある `SampleScene` を Hierarchy にドロップします。
 - 追加した "Sample Scene" 以外のシーンが Hierarchy にある場合は、Unity Editor が自動で追加したものなので削除してください。
 - このアプリを実行する前に Looking Glass Bridge [[URL](https://lookingglassfactory.com/software/looking-glass-bridge)] を実行して常駐させてください。
@@ -56,12 +60,10 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 
 ![fig2](https://github.com/user-attachments/assets/15175e2d-41d7-4a30-a5a5-6748065f1ff2)
 
-~~**Q: Python スクリプトの出力画像のサイズが大きいです。圧縮してもデプス情報は維持されますか。**~~
-
-~~**A:** 非圧縮で出力しているため、サイズが大きいです。試しに GIMP で "Save color values from transparent pixels" にチェックを入れ、右半分にデプス推定結果が付いた出力画像を圧縮レベル 9 でPNG形式で保存し、このアプリで読み込んでみました。どのようなデプス情報が保持されているかは未確認ですが、デプスの相互関係が大きく破綻する様子は観られませんでした。圧縮した画像を使用するとアプリの動作が軽くなりますが、画質は低下します。~~
-恥ずかしながら PNG の圧縮がロスレスだということを先程知りましたので、`python depth-pro_rgbde.py` で圧縮レベル 9 で出力するように修正しました。
-
 ---
+
+## English
+
 The following is an automatic translation by ChatGPT and is a provisional translation.
 
 ### Overview
@@ -73,9 +75,9 @@ The output Quilt image can be loaded into Looking Glass Studio.
 
 To run the Python script, you need to install Depth Pro separately. [[URL](https://github.com/apple/ml-depth-pro)]
 
-**V1.1.8:** I simplified the texture scaling and cropping logic in `ImageCropper.cs` using openrouter/optimus-alpha. Additionally, I made improvements to reduce visual artifacts ("edge noise") on the texture boundaries.
+**V1.2:** You can now rotate the model up to 30 degrees in the up, down, left, and right directions using the arrow keys. I also switched the model’s depth calculation to a linear method.
 
-### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.1.8)
+### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.2)
 
 ### Summary of Setup and Usage
 1. Install Depth Pro according to the method described on the official page.
@@ -96,16 +98,16 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 - **Navigation Controls**: Left-drag with the mouse to move, scroll the wheel to zoom, right-click to return to the initial state.
 - **Sliders**: The relationship of each slider is as shown in the figure below. Note that the two "Camera Position" sliders are used to adjust the depth at which focus is achieved on Looking Glass Go.
 
-![fig1](https://github.com/user-attachments/assets/4e8e1507-1e02-4fd2-b5b6-7451270beeb6)
+![fig1](https://github.com/user-attachments/assets/8b551571-4ab0-49a0-98b9-ee6a457dfe6f)
 
-- **Save Quilt Image**: Press the **F1 key** to save the Quilt image in the `Recordings` folder. The Quilt image can be loaded into Looking Glass Studio. ~~Note that metadata is not included in the image, so you need to manually specify 11 horizontal x 6 vertical tiles.~~
+- **Save Quilt Image**: Press the **F1 key** to save the Quilt image in the `Recordings` folder. The Quilt image can be loaded into Looking Glass Studio.
 - **Exit App**: Use the **QUIT** button to exit the app.
 
 ### Loading and Using in Unity Editor
 - Place the contents of the source files into any folder and add the project by specifying that folder in Unity Hub with **Add project from disk**.
 - Since external packages are not included, a compile error will occur during the process; select **Ignore**.
-- Delete the camera and light that Unity Editor automatically adds.
-- Download and add (via **Import Package -> Custom Package**) the Looking Glass Unity Plugin package [[URL](https://lookingglassfactory.com/software/looking-glass-unity-plugin)] and the UnityStandaloneFileBrowser Unity package [[URL](https://github.com/gkngkc/UnityStandaloneFileBrowser)] to the project. This will resolve the errors.
+- Download and import the the Looking Glass Unity Plugin package [[URL](https://lookingglassfactory.com/software/looking-glass-unity-plugin)] and the UnityStandaloneFileBrowser Unity package [[URL](https://github.com/gkngkc/UnityStandaloneFileBrowser)] into the project via **Import Package -> Custom Package**. This should resolve the errors.
+**Note:** When importing the Looking Glass Unity Plugin, **deselect the `Examples` folder**; otherwise, compile errors may occur.
 - Drag `SampleScene` located in `Assets > Scenes` into the Hierarchy panel.
 - If there are scenes other than the added "SampleScene" in the Hierarchy, delete them as they were automatically added by Unity Editor.
 - Before running this app, run Looking Glass Bridge [[URL](https://lookingglassfactory.com/software/looking-glass-bridge)].
@@ -119,9 +121,3 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 **A:** Normally, an RGBD image retains 255-level depth information on the right side of the original image. In `run.py` included with Depth Pro, the inverse of depth information from 0.1m to 250m is normalized for each pixel, and depths from 0 to 255 are assigned. In this method, the depth resolution of close objects is high, but in images where, for example, the ground, walls, grass, or small objects accidentally captured are in the foreground and the main subject is in the background, the depth gradation of the main subject becomes low. This results in an output with less depth detail (see the figure below). On the other hand, in the script of this tool, the original float depth information is multiplied by 10,000 and stored as `uint32`. Therefore, even if you zoom in on the main subject, the depth information is maintained as originally estimated, preserving the stereoscopic effect.
 
 ![fig2](https://github.com/user-attachments/assets/15175e2d-41d7-4a30-a5a5-6748065f1ff2)
-
-~~**Q: The output imaze size of the Python script is large. Will the depth information be preserved if compressed?**~~
-
-~~**A:** The large size is due to the output being uncompressed. I tested by saving the output image with depth estimation results on the right half in PNG format with compression level 9 using GIMP, checking the "Save color values from transparent pixels" option. I then loaded the image into this app. While I haven't confirmed how the depth information is retained, there was no significant distortion in the relative depth relationships. Using the compressed image makes the app run more smoothly, but the image quality deteriorates.~~
-
-Embarrassingly, I just learned that PNG compression is lossless, so I modified the script `python depth-pro_rgbde.py` to output with compression level 9.

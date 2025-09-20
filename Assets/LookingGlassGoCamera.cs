@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class LookingGlassGoCamera : MonoBehaviour
 {
     /// <summary>
-    /// LookingGlass‚ğ‰f‚µ‚Ä‚¢‚éƒJƒƒ‰
+    /// LookingGlassã‚’æ˜ ã—ã¦ã„ã‚‹ã‚«ãƒ¡ãƒ©
     /// </summary>
     [SerializeField]
     private Camera _GoCamera;
@@ -29,24 +29,28 @@ public class LookingGlassGoCamera : MonoBehaviour
 
 
     /// <summary>
-    /// Width Resolution of Looking Glass Go, Looking Glass Go‚Ì‰ğ‘œ“xi‰¡j 
+    /// Width Resolution of Looking Glass Go, Looking Glass Goã®è§£åƒåº¦ï¼ˆæ¨ªï¼‰ 
     /// </summary>
     private const int LOOKINGGLASS_WIDTH = 1440;
 
     /// <summary>
-    /// Height Resolution of Looking Glass Go, Looking Glass Go ‚Ì‰ğ‘œ“xicj
+    /// Height Resolution of Looking Glass Go, Looking Glass Go ã®è§£åƒåº¦ï¼ˆç¸¦ï¼‰
     /// </summary>
     private const int LOOKINGGLASS_HEIGHT = 2560;
+    private const float BASE_CAMERA_Z = 50f;
+
+    private bool isInitialized;
+
     private void Start()
     {
-        //Activate the screen of Looking Glass Go, Looking Glass Go ‚Ì‰æ–Ê‚ğƒAƒNƒeƒBƒx[ƒg
-        //* not effective on Editor, ¦Editorã‚Å‚ÍŒø‚©‚È‚¢B
+        //Activate the screen of Looking Glass Go, Looking Glass Go ã®ç”»é¢ã‚’ã‚¢ã‚¯ãƒ†ã‚£ãƒ™ãƒ¼ãƒˆ
+        //* not effective on Editor, â€»Editorä¸Šã§ã¯åŠ¹ã‹ãªã„ã€‚
         UnityEngine.Display[] displays = UnityEngine.Display.displays;
 
         // Display.displays[0] is the main default display and is always ON.
         // Check and activate additional displays. (quoted from the web)
-        // Display.displays[0] ‚Íå—vƒfƒtƒHƒ‹ƒgƒfƒBƒXƒvƒŒƒC‚ÅAí‚É ONB
-        // ’Ç‰ÁƒfƒBƒXƒvƒŒƒC‚ª‰Â”\‚©‚ğŠm”F‚µƒAƒNƒeƒBƒx[ƒgBiweb‚©‚çˆø—pj
+        // Display.displays[0] ã¯ä¸»è¦ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ‡ã‚£ã‚¹ãƒ—ãƒ¬ã‚¤ã§ã€å¸¸ã« ONã€‚
+        // è¿½åŠ ãƒ‡ã‚£ã‚¹ãƒ—ãƒ¬ã‚¤ãŒå¯èƒ½ã‹ã‚’ç¢ºèªã—ã‚¢ã‚¯ãƒ†ã‚£ãƒ™ãƒ¼ãƒˆã€‚ï¼ˆwebã‹ã‚‰å¼•ç”¨ï¼‰
         if (UnityEngine.Display.displays.Length > 1)
             UnityEngine.Display.displays[1].Activate();
 
@@ -61,23 +65,66 @@ public class LookingGlassGoCamera : MonoBehaviour
         sliderCameraPosition = sliderCP.GetComponent<Slider>();
         vCP = valueCP.GetComponent<TextMeshProUGUI>();
         vCP.text = sliderCameraPosition.value.ToString("f1");
+        AttachSliderKeyboardBlocker(sliderCP);
+
         sliderCPMultiply = sliderCPM.GetComponent<Slider>();
         vCPM = valueCPM.GetComponent<TextMeshProUGUI>();
-        vCPM.text = sliderCPMultiply.value.ToString("f1");
+        vCPM.text = GetMultiplierValue().ToString("f0");
+        AttachSliderKeyboardBlocker(sliderCPM);
 
+        isInitialized = true;
+        ApplyCameraPosition();
     }
 
     public void Update()
     {
-        // Set Camera Position (Z)
-        Transform goCameraTransform = this.transform;
-        Vector3 pos = goCameraTransform.position;
-        int _sliderCPMValue = Mathf.FloorToInt(sliderCPMultiply.value) * 10;
+        if (!isInitialized)
+        {
+            return;
+        }
 
-        pos.z = sliderCameraPosition.value + _sliderCPMValue + 50f;
+        ApplyCameraPosition();
+    }
+
+    public bool IsInitialized => isInitialized;
+
+    public float CameraOffset => isInitialized ? sliderCameraPosition.value + GetMultiplierValue() : 0f;
+
+    public float CameraZ => CameraOffset + BASE_CAMERA_Z;
+
+    private void ApplyCameraPosition()
+    {
+        float multiplier = GetMultiplierValue();
+        float offset = sliderCameraPosition.value + multiplier;
+
+        Vector3 pos = transform.position;
+        pos.z = offset + BASE_CAMERA_Z;
+        transform.position = pos;
+
         vCP.text = sliderCameraPosition.value.ToString("f1");
-        vCPM.text = _sliderCPMValue.ToString("f0");
+        vCPM.text = multiplier.ToString("f0");
+    }
 
-        goCameraTransform.position = pos;
+    private float GetMultiplierValue()
+    {
+        if (sliderCPMultiply == null)
+        {
+            return 0f;
+        }
+
+        return Mathf.FloorToInt(sliderCPMultiply.value) * 10f;
+    }
+
+    private void AttachSliderKeyboardBlocker(GameObject sliderObject)
+    {
+        if (sliderObject == null)
+        {
+            return;
+        }
+
+        if (!sliderObject.TryGetComponent(out DisableSliderKeyboardInput blocker))
+        {
+            sliderObject.AddComponent<DisableSliderKeyboardInput>();
+        }
     }
 }

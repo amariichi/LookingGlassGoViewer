@@ -13,8 +13,8 @@ public class ImageCreatedEvent : UnityEvent<GameObject, Sprite> { }
 public class ImageSplitter : MonoBehaviour
 {
     // --- 定数 ---
-    private const int TARGET_WIDTH = 360;   // 左画像のターゲット幅（ピクセル）
-    private const int TARGET_HEIGHT = 640;  // 左画像のターゲット高さ（ピクセル）
+    public const int TARGET_WIDTH = 360;   // 左画像のターゲット幅（ピクセル）
+    public const int TARGET_HEIGHT = 640;  // 左画像のターゲット高さ（ピクセル）
 
     // --- Inspectorで設定可能なフィールド ---
     [SerializeField] private float _offset = 90f; // 左画像の表示位置オフセット（右方向）
