@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using LookingGlass;
 
 /// <summary>
 /// カスタムグリッドメッシュを生成・操作するコンポーネント
@@ -57,6 +58,20 @@ public class CustomGridMesh : MonoBehaviour
     private bool pendingMeshUpdate;
 
     public bool IsMeshCreated => isMeshCreated;
+
+    [Header("視差補正設定")]
+    [Tooltip("HologramCamera の縦方向FOVを使用して視差計算を行うかどうか")]
+    [SerializeField] private bool useHologramCameraFov = true;
+    [Tooltip("HologramCamera が取得できない場合に使用する縦方向FOV(度)")]
+    [SerializeField, Range(5f, 120f)] private float fallbackVerticalFov = 18f;
+    [Tooltip("XZ方向の補正強度(0で従来通り、1でフル補正)")]
+    [SerializeField, Range(0f, 2f)] private float perspectiveStrength = 1f;
+
+    private Vector3[] baseVertices;
+    private float[] normalizedXs;
+    private float[] normalizedYs;
+    private int currentMeshWidth;
+    private int currentMeshHeight;
 
     private const float CropDistanceSliderMin = 1f;
     private const float CropDistanceSliderMax = 100f;
@@ -285,20 +300,6 @@ public class CustomGridMesh : MonoBehaviour
     }
 
     /// <summary>
-    /// 各頂点のZ座標を更新
-    /// </summary>
-    public void UpdateVertexZPositions(Func<int, float> zPositionFunc)
-    {
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i].z = zPositionFunc(i);
-        }
-
-        mesh.vertices = vertices;
-        mesh.RecalculateBounds();
-    }
-
-    /// <summary>
     /// メッシュ生成
     /// </summary>
     public void CreateMesh(int meshWidth, int meshHeight)
@@ -318,6 +319,16 @@ public class CustomGridMesh : MonoBehaviour
         Vector2[] uvs = new Vector2[numVertices];
         int[] triangles = new int[numIndices];
 
+        currentMeshWidth = meshWidth;
+        currentMeshHeight = meshHeight;
+
+        if (baseVertices == null || baseVertices.Length != numVertices)
+        {
+            baseVertices = new Vector3[numVertices];
+            normalizedXs = new float[numVertices];
+            normalizedYs = new float[numVertices];
+        }
+
         // 頂点・UV生成
         for (int y = 0; y < verticesPerColumn; y++)
         {
@@ -326,8 +337,14 @@ public class CustomGridMesh : MonoBehaviour
                 int index = y * verticesPerRow + x;
                 vertices[index] = new Vector3(x * cellSize, y * cellSize, 0);
                 uvs[index] = new Vector2((float)x / meshWidth, (float)y / meshHeight);
+                float normalizedX = meshWidth == 0 ? 0f : ((float)x / meshWidth - 0.5f) * 2f;
+                float normalizedY = meshHeight == 0 ? 0f : ((float)y / meshHeight - 0.5f) * 2f;
+                normalizedXs[index] = normalizedX;
+                normalizedYs[index] = normalizedY;
             }
         }
+
+        Array.Copy(vertices, baseVertices, numVertices);
 
         // 三角形生成
         int triangleIndex = 0;
@@ -373,39 +390,79 @@ public class CustomGridMesh : MonoBehaviour
 
     private void ApplyDepthToMesh()
     {
+        if (vertices == null || baseVertices == null || normalizedXs == null || normalizedYs == null || zValues == null)
+            return;
+
+        if (zValues.Length != vertices.Length)
+            return;
+
         magnificationRatio = sliderMagnificationRatio.value;
         cropDistance = ConvertCropDistanceSliderToValue(sliderCropDistance.value);
         compressNearest = sliderCompressNearest.value;
         compressFarthest = ConvertCompressFarthestSliderToValue(sliderCompressFarthest.value);
         compressDistance = Mathf.Clamp(sliderCompressDistance.value, CompressDistanceMin, CompressDistanceMax);
 
-        UpdateVertexZPositions(i =>
+        if (compressFarthest < compressNearest + 0.1f)
         {
-            float zValue = Mathf.Min((zValues[i] - zValueMin) * imageManipulator.displayedScale, cropDistance);
-//            zValue = 2f / 3.1416f * Mathf.Atan(zValue /((1f / 50f)*(magnificationRatio - 1f) + 1f)) * magnificationRatio;
+            compressFarthest = compressNearest + 0.1f;
+            if (sliderCompressFarthest != null)
+            {
+                sliderCompressFarthest.SetValueWithoutNotify(ConvertCompressFarthestValueToSlider(compressFarthest));
+            }
+            if (vCompF != null)
+            {
+                vCompF.text = compressFarthest.ToString("#####");
+            }
+        }
+
+        float allowedDistance = Mathf.Max(CompressDistanceMin, Mathf.Min(CompressDistanceMax, compressFarthest - compressNearest - 0.1f));
+        if (compressDistance > allowedDistance)
+        {
+            compressDistance = allowedDistance;
+            if (sliderCompressDistance != null)
+            {
+                sliderCompressDistance.SetValueWithoutNotify(compressDistance);
+            }
+            if (vCompD != null)
+            {
+                vCompD.text = compressDistance.ToString("f1");
+            }
+        }
+
+        float verticalFovDeg = Mathf.Clamp(GetEffectiveVerticalFov(), 5f, 120f);
+        float tanHalfVertical = Mathf.Tan(verticalFovDeg * Mathf.Deg2Rad * 0.5f);
+        int width = Mathf.Max(1, currentMeshWidth);
+        int height = Mathf.Max(1, currentMeshHeight);
+        float tanHalfHorizontal = tanHalfVertical * (width / (float)height);
+        float displayScale = imageManipulator != null ? imageManipulator.displayedScale : 1f;
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            float zValue = Mathf.Min((zValues[i] - zValueMin) * displayScale, cropDistance);
             zValue = zValue / 2.5f * magnificationRatio;
 
-            if (compressFarthest < compressNearest) { compressFarthest = compressNearest + 0.1f; }
-            float allowedDistance = Mathf.Max(CompressDistanceMin, Mathf.Min(CompressDistanceMax, compressFarthest - compressNearest - 0.1f));
-            if (compressDistance > allowedDistance)
-            {
-                compressDistance = allowedDistance;
-                if (sliderCompressDistance != null)
-                {
-                    sliderCompressDistance.SetValueWithoutNotify(compressDistance);
-                }
-            }
             if (zValue > compressNearest && zValue < compressFarthest)
             {
-                zValue = (compressNearest + (zValue - compressNearest) / (compressFarthest - compressNearest) * compressDistance);
+                zValue = compressNearest + (zValue - compressNearest) / (compressFarthest - compressNearest) * compressDistance;
             }
             else if (zValue >= compressFarthest)
             {
                 zValue = Mathf.Max(compressNearest, (zValue - compressFarthest) + compressDistance + compressNearest);
             }
 
-            return zValue;
-        });
+            float lateralDepth = zValue * perspectiveStrength;
+            float deltaX = normalizedXs[i] * tanHalfHorizontal * lateralDepth;
+            float deltaY = normalizedYs[i] * tanHalfVertical * lateralDepth;
+
+            vertices[i] = new Vector3(
+                baseVertices[i].x + deltaX,
+                baseVertices[i].y + deltaY,
+                baseVertices[i].z + zValue
+            );
+        }
+
+        mesh.vertices = vertices;
+        mesh.RecalculateBounds();
 
         pendingMeshUpdate = false;
     }
@@ -413,5 +470,19 @@ public class CustomGridMesh : MonoBehaviour
     private void HandleDisplayParametersChanged()
     {
         pendingMeshUpdate = true;
+    }
+
+    private float GetEffectiveVerticalFov()
+    {
+        if (useHologramCameraFov)
+        {
+            HologramCamera instance = HologramCamera.Instance;
+            if (instance != null)
+            {
+                return instance.CameraProperties.FieldOfView;
+            }
+        }
+
+        return fallbackVerticalFov;
     }
 }
