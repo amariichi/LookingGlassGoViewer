@@ -8381,6 +8381,9 @@ MonoBehaviour:
   compressNearest: 0.1
   compressFarthest: 4
   compressDistance: 1.9
+  useHologramCameraFov: 1
+  fallbackVerticalFov: 18
+  perspectiveStrength: 1
 --- !u!23 &1883921798
 MeshRenderer:
   m_ObjectHideFlags: 0
