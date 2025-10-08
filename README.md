@@ -18,7 +18,7 @@ python スクリプトの実行には、別途 Depth Pro [[URL](https://github.c
 **V1.3:** カメラのFOV方向に沿ってメッシュ頂点を再投影し、スライダー範囲を HologramCamera 設定に連動させて奥行き投影を改善。
 
 **V1.2:** カーソルキーでモデルを上下左右30度まで回転できるようになりました。また、モデルの奥行きの計算方法をリニアに変更しました。
-### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.3)
+### [ファイルのダウンロード](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.3.1)
 
 ### 設定方法及び使用方法の概要
 1. Depth Pro を公式ページに記載の方法でインストール。
@@ -81,7 +81,7 @@ To run the Python script, you need to install Depth Pro separately. [[URL](https
 
 **V1.2:** You can now rotate the model up to 30 degrees in the up, down, left, and right directions using the arrow keys. I also switched the model’s depth calculation to a linear method.
 
-### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.3)
+### [Download Files](https://github.com/amariichi/LookingGlassGoViewer/releases/tag/v1.3.1)
 
 ### Summary of Setup and Usage
 1. Install Depth Pro according to the method described on the official page.
